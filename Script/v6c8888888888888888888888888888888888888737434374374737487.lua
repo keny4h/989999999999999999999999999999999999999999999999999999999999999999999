@@ -1930,7 +1930,7 @@ local function LoadVxnityHub()
     -- ============================================================
     -- SLIDER VELOCIDAD — rango extendido hasta 50x, tiempo real
     -- ============================================================
-    ReactTab:Section({ Title = "🎚️ Ball Speed Control" })
+    ReactTab:Section({ Title = " Ball Speed Control" })
     ReactTab:Slider({
         Title = "Ball Speed Multiplier",
         Desc = "Control de velocidad en tiempo real (hasta 50x)",
@@ -2471,9 +2471,9 @@ local function LoadVxnityHub()
     local dribbleConnection = nil
 
     local DRIBBLE_CONFIG = {
-        Low = { strength = 800, deadzone = 0.15, offset = 0.35 },
-        Medium = { strength = 1400, deadzone = 0.08, offset = 0.28 },
-        High = { strength = 2200, deadzone = 0.04, offset = 0.22 }
+        Low = { strength = 800, deadzone = 0.1, offset = 0.1 },
+        Medium = { strength = 1400, deadzone = 0.01, offset = 0.1 },
+        High = { strength = 2200, deadzone = 0.01, offset = 0.1 }
     }
 
     DribbleTab:Section({ Title = "🎯 Ball Control Assist" })
