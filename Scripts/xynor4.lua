@@ -1,8 +1,8 @@
 --[[
     ═══════════════════════════════════════════════════════════════
-                    XYNOR HUB 3.0 - COMPLETE REDESIGN
-                    Premium UI/UX · Modern · Professional
-                    All Original Features Preserved 100%
+                    XYNOR HUB 1.0 - HIII SKIDEERR
+                    Premium UI/UX · Xynor · v1
+                             TE OBSERVÓ 
     ═══════════════════════════════════════════════════════════════
 --]]
 
