@@ -1,6 +1,6 @@
 --[[
     ═══════════════════════════════════════════════════════════════
-                    XYNOR HUB 3.0 - COMPLETE REDESIGN
+                    XYNOR HUB 3.0 - HIIII SKIDDDDDDDDDDDDDDDDDDD
                     Premium UI/UX · Modern · Professional
                     All Original Features Preserved 100%
     ═══════════════════════════════════════════════════════════════
@@ -88,7 +88,7 @@ end
 -- ═══════════════════════════════════════════════════════════════
 local KeySystem = {
     StorageName = "XynorKey_v3",
-    ValidKeys = {"xynor3", "xynor", "premium", "beta", "v3", "xynorhub", "kenyah"}
+    ValidKeys = {"123", "xynor", "premium", "beta", "v3", "xynorhub", "kenyah"}
 }
 
 function KeySystem:GetSaved()
