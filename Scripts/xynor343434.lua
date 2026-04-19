@@ -94,34 +94,7 @@ local Theme = {
     Warning = Color3.fromRGB(255, 211, 105),
 }
 
--- ═══════════════════════════════════════════════════════════════
--- PROFESSIONAL EASING FUNCTIONS
--- ═══════════════════════════════════════════════════════════════
-local function tweenSmooth(obj, dur, props)
-    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props)
-end
-
-local function tweenBounce(obj, dur, props)
-    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), props)
-end
-
-local function tweenSpring(obj, dur, props)
-    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Back, Enum.EasingDirection.Out), props)
-end
-
--- ═══════════════════════════════════════════════════════════════
--- HELPER FUNCTIONS
--- ═══════════════════════════════════════════════════════════════
-local function getGuiParent()
-    if gethui then return gethui() end
-    local ok, cg = pcall(function() return game:GetService("CoreGui") end)
-    if ok and cg then return cg end
-    return LocalPlayer:WaitForChild("PlayerGui")
-end
-
--- ═══════════════════════════════════════════════════════════════
 -- KEY SYSTEM WITH LOCAL PERSISTENCE
--- ═══════════════════════════════════════════════════════════════
 local KeySystem = {
     StorageName = "XynorKey_v3",
     ValidKeys = {"123", "xynor", "premium", "beta", "v3", "xynorhub", "kenyah"}
@@ -2896,6 +2869,126 @@ function runMainHub()
 end
 
 -- ═══════════════════════════════════════════════════════════════
+-- LAUNCH ICON (Centrado, con imagen premium)
+-- ═══════════════════════════════════════════════════════════════
+local function CreateLaunchIcon()
+    local Parent = getGuiParent()
+    
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "XynorLaunchIcon"
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.Parent = Parent
+    
+    -- Overlay de fondo con blur ligero
+    local overlay = Instance.new("Frame")
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.BackgroundColor3 = Theme.White
+    overlay.BackgroundTransparency = 0.85
+    overlay.BorderSizePixel = 0
+    overlay.Parent = ScreenGui
+    
+    local ovC = Instance.new("UICorner")
+    ovC.CornerRadius = UDim.new(0, 20)
+    ovC.Parent = overlay
+    
+    -- Contenedor central para el icono
+    local IconContainer = Instance.new("Frame")
+    IconContainer.Size = UDim2.fromOffset(120, 120)
+    IconContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    IconContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    IconContainer.BackgroundTransparency = 1
+    IconContainer.Parent = ScreenGui
+    
+    -- Botón icono principal (circular)
+    local IconBtn = Instance.new("ImageButton")
+    IconBtn.Size = UDim2.fromOffset(90, 90)
+    IconBtn.Position = UDim2.new(0.5, 0, 0.5, 0)
+    IconBtn.AnchorPoint = Vector2.new(0.5, 0.5)
+    IconBtn.BackgroundColor3 = Theme.White
+    IconBtn.Image = "rbxassetid://91032354785729"
+    IconBtn.ScaleType = Enum.ScaleType.Fit
+    IconBtn.BorderSizePixel = 0
+    IconBtn.Parent = IconContainer
+    
+    local iconC = Instance.new("UICorner")
+    iconC.CornerRadius = UDim.new(0, 22)
+    iconC.Parent = IconBtn
+    
+    -- Borde sutil
+    local iconStroke = Instance.new("UIStroke")
+    iconStroke.Color = Theme.Border
+    iconStroke.Thickness = 2
+    iconStroke.Transparency = 0.3
+    iconStroke.Parent = IconBtn
+    
+    -- Anillo pulsante exterior
+    local pulseRing = Instance.new("Frame")
+    pulseRing.Size = UDim2.fromOffset(110, 110)
+    pulseRing.Position = UDim2.new(0.5, 0, 0.5, 0)
+    pulseRing.AnchorPoint = Vector2.new(0.5, 0.5)
+    pulseRing.BackgroundColor3 = Theme.Primary
+    pulseRing.BackgroundTransparency = 0.9
+    pulseRing.BorderSizePixel = 0
+    pulseRing.ZIndex = IconBtn.ZIndex - 1
+    pulseRing.Parent = IconContainer
+    
+    local prC = Instance.new("UICorner")
+    prC.CornerRadius = UDim.new(0, 24)
+    prC.Parent = pulseRing
+    
+    -- Animación de pulso continua
+    task.spawn(function()
+        while ScreenGui.Parent do
+            tweenSmooth(pulseRing, 1.5, { BackgroundTransparency = 0.7, Size = UDim2.fromOffset(115, 115) }):Play()
+            task.wait(0.75)
+            if ScreenGui.Parent then
+                tweenSmooth(pulseRing, 1.5, { BackgroundTransparency = 0.95, Size = UDim2.fromOffset(105, 105) }):Play()
+                task.wait(0.75)
+            end
+        end
+    end)
+    
+    -- Hover effects
+    IconBtn.MouseEnter:Connect(function()
+        tweenElastic(IconBtn, 0.2, { Size = UDim2.fromOffset(100, 100) }):Play()
+    end)
+    
+    IconBtn.MouseLeave:Connect(function()
+        tweenSmooth(IconBtn, 0.2, { Size = UDim2.fromOffset(90, 90) }):Play()
+    end)
+    
+    -- Click para abrir la ventana principal
+    IconBtn.MouseButton1Click:Connect(function()
+        -- Animación de salida
+        tweenSpring(IconBtn, 0.15, { Size = UDim2.fromOffset(0, 0) }):Play()
+        tweenSmooth(pulseRing, 0.2, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenSmooth(overlay, 0.3, { BackgroundTransparency = 1 }):Play()
+        
+        task.wait(0.3)
+        
+        -- Remover blur
+        setBlur(0, 0.4)
+        
+        -- Destruir icono
+        ScreenGui:Destroy()
+        
+        -- Abrir ventana principal
+        runMainHub()
+    end)
+    
+    -- Animación de entrada
+    IconBtn.Size = UDim2.fromOffset(0, 0)
+    IconBtn.ImageTransparency = 1
+    pulseRing.Size = UDim2.fromOffset(0, 0)
+    pulseRing.BackgroundTransparency = 0
+    
+    task.wait(0.1)
+    tweenElastic(IconBtn, 0.6, { Size = UDim2.fromOffset(90, 90), ImageTransparency = 0 }):Play()
+    tweenSmooth(pulseRing, 0.5, { Size = UDim2.fromOffset(110, 110), BackgroundTransparency = 0.9 }):Play()
+end
+
+-- ═══════════════════════════════════════════════════════════════
 -- ENTRY POINT
 -- ═══════════════════════════════════════════════════════════════
 
@@ -2927,11 +3020,9 @@ local function doValidateKey()
             loader.Gui:Destroy()
         end
         
-        -- Small delay before showing main UI
-        task.wait(0.2)
-        
-        -- Show main hub
-        runMainHub()
+        -- Create launch icon (circle with image)
+        task.wait(0.3)
+        CreateLaunchIcon()
     else
         loader.Feedback.Text = "✗ Invalid key"
         loader.Feedback.TextColor3 = Theme.Danger
@@ -2964,11 +3055,9 @@ task.spawn(function()
             loader.Gui:Destroy()
         end
         
-        -- Small delay before showing main UI
-        task.wait(0.2)
-        
-        -- Show main hub
-        runMainHub()
+        -- Create launch icon (circle with image)
+        task.wait(0.3)
+        CreateLaunchIcon()
     end
 end)
 
