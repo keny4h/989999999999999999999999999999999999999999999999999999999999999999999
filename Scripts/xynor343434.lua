@@ -160,6 +160,99 @@ local function CreateLoader()
     
     setBlur(8, 0)
     
+    local particleColors = {
+        Theme.Primary,
+        Theme.Accent,
+        Color3.fromRGB(129, 199, 132),
+        Color3.fromRGB(255, 211, 105),
+        Color3.fromRGB(171, 145, 235),
+        Color3.fromRGB(255, 183, 178),
+        Color3.fromRGB(159, 168, 218),
+        Color3.fromRGB(144, 202, 249),
+    }
+    
+    local function createParticle()
+        local shapes = {"Circle", "Triangle", "Star"}
+        local shapeType = shapes[math.random(#shapes)]
+        
+        local size = math.random(15, 45)
+        local startX = math.random(-300, 300)
+        local startY = math.random(-200, 200)
+        
+        local particle
+        if shapeType == "Circle" then
+            particle = Instance.new("Frame")
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0.5, 0)
+            corner.Parent = particle
+        elseif shapeType == "Triangle" then
+            particle = Instance.new("Frame")
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 3)
+            corner.Parent = particle
+        else
+            particle = Instance.new("Frame")
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 4)
+            corner.Parent = particle
+        end
+        
+        particle.Size = UDim2.fromOffset(size, size)
+        particle.Position = UDim2.new(0.5, startX, 0.5, startY)
+        particle.BackgroundColor3 = particleColors[math.random(#particleColors)]
+        particle.BackgroundTransparency = 1
+        particle.BorderSizePixel = 0
+        particle.AnchorPoint = Vector2.new(0.5, 0.5)
+        particle.Parent = ScreenGui
+        
+        local rotationSpeed = math.random(100, 300)
+        local floatSpeed = math.random(2, 4)
+        
+        tweenSmooth(particle, 0.5, { BackgroundTransparency = 0.6 }):Play()
+        
+        local startTime = os.clock()
+        local duration = math.random(2, 4)
+        
+        local conn
+        conn = RunService.RenderStepped:Connect(function()
+            if not particle.Parent then
+                conn:Disconnect()
+                return
+            end
+            
+            local elapsed = os.clock() - startTime
+            if elapsed > duration then
+                tweenSmooth(particle, 0.4, { BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 0) }):Play()
+                task.wait(0.5)
+                particle:Destroy()
+                conn:Disconnect()
+                return
+            end
+            
+            local yOffset = math.sin(elapsed * floatSpeed) * 80
+            local newY = startY + yOffset - (elapsed * 30)
+            
+            particle.Position = UDim2.new(0.5, startX + math.sin(elapsed * 2) * 30, 0.5, newY)
+            particle.Rotation = elapsed * rotationSpeed
+        end)
+        
+        return particle
+    end
+    
+    local particleConnection
+    task.spawn(function()
+        local frameCount = 0
+        particleConnection = RunService.RenderStepped:Connect(function()
+            frameCount = frameCount + 1
+            if frameCount % 8 == 0 then
+                local numParticles = math.random(1, 2)
+                for i = 1, numParticles do
+                    task.spawn(createParticle)
+                end
+            end
+        end)
+    end)
+    
     local Container = Instance.new("Frame")
     Container.Size = UDim2.fromOffset(420, 320)
     Container.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -506,7 +599,8 @@ local function CreateLoader()
         KeyFrame = KeyFrame,
         ProgressText = ProgressText,
         ProgressBar = ProgressBar,
-        IsLoadingDone = function() return loadingDone end
+        IsLoadingDone = function() return loadingDone end,
+        ParticleConn = particleConnection
     }
 end
 
@@ -546,7 +640,7 @@ local function BuildMainWindow()
     
     -- Main frame (now on top of glass)
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.fromOffset(50, 50)
+    MainFrame.Size = UDim2.fromOffset(180, 180)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.BackgroundColor3 = Theme.White
@@ -1556,25 +1650,27 @@ local function BuildMainWindow()
         MainFrame.Visible = true
         GlassOverlay.Visible = true
         
-        tweenElastic(MainFrame, 0.8, { 
+        tweenElastic(MainFrame, 0.5, { 
             Size = UDim2.fromOffset(winW, winH),
             BackgroundTransparency = 0
         }):Play()
         
-        tweenExpo(GlassOverlay, 0.6, { BackgroundTransparency = 0.7 }):Play()
+        task.wait(0.1)
         
-        task.wait(0.25)
+        tweenExpo(GlassOverlay, 0.4, { BackgroundTransparency = 0.7 }):Play()
         
-        tweenSmooth(Topbar, 0.35, { BackgroundTransparency = 0 }):Play()
+        task.wait(0.15)
+        
+        tweenBack(Topbar, 0.25, { BackgroundTransparency = 0 }):Play()
         
         task.wait(0.08)
-        tweenElastic(TitleLbl, 0.4, { TextTransparency = 0, TextSize = 20 }):Play()
+        tweenElastic(TitleLbl, 0.3, { TextTransparency = 0, TextSize = 20 }):Play()
         task.wait(0.05)
-        tweenSmooth(CreditLbl, 0.35, { TextTransparency = 0 }):Play()
+        tweenSine(CreditLbl, 0.25, { TextTransparency = 0 }):Play()
         
         task.wait(0.1)
         
-        tweenSmooth(Sidebar, 0.4, { BackgroundTransparency = 0 }):Play()
+        tweenBack(Sidebar, 0.3, { BackgroundTransparency = 0 }):Play()
         
         local sideButtons = {}
         for _, child in pairs(SidebarInner:GetChildren()) do
@@ -1583,14 +1679,16 @@ local function BuildMainWindow()
             end
         end
         
-        for i, btn in ipairs(sideButtons) do
+        local btnDelay = 0
+        for _, btn in ipairs(sideButtons) do
             task.spawn(function()
-                task.wait(i * 0.06)
-                tweenElastic(btn, 0.35, { BackgroundTransparency = 0 }):Play()
+                task.wait(btnDelay)
+                tweenQuint(btn, 0.15, { BackgroundTransparency = 0 }):Play()
             end)
+            btnDelay = btnDelay + 0.03
         end
         
-        task.wait(0.35)
+        task.wait(0.25)
         
         for _, p in ipairs(PageHolder:GetChildren()) do
             if p:IsA("Frame") and p.Visible then
@@ -1599,19 +1697,21 @@ local function BuildMainWindow()
                         for _, inner in pairs(child:GetChildren()) do
                             if inner:IsA("Frame") then
                                 local elements = inner:GetChildren()
-                                for j, el in ipairs(elements) do
+                                local elDelay = 0
+                                for _, el in ipairs(elements) do
                                     if el:IsA("Frame") or el:IsA("TextLabel") or el:IsA("TextButton") then
                                         el.BackgroundTransparency = 1
                                         if el:IsA("TextLabel") or el:IsA("TextButton") then
                                             el.TextTransparency = 1
                                         end
                                         task.spawn(function()
-                                            task.wait(j * 0.04)
-                                            tweenSmooth(el, 0.2, { BackgroundTransparency = 0 }):Play()
+                                            task.wait(elDelay)
+                                            tweenSine(el, 0.15, { BackgroundTransparency = 0 }):Play()
                                             if el:IsA("TextLabel") or el:IsA("TextButton") then
-                                                tweenSmooth(el, 0.2, { TextTransparency = 0 }):Play()
+                                                tweenSine(el, 0.15, { TextTransparency = 0 }):Play()
                                             end
                                         end)
+                                        elDelay = elDelay + 0.03
                                     end
                                 end
                             end
@@ -2795,6 +2895,7 @@ local function doValidateKey()
         setBlur(0, 0.4)
         
         if loader.Gui and loader.Gui.Parent then
+            if loader.ParticleConn then loader.ParticleConn:Disconnect() end
             loader.Gui:Destroy()
         end
         
@@ -2828,6 +2929,7 @@ task.spawn(function()
         setBlur(0, 0.4)
         
         if loader.Gui and loader.Gui.Parent then
+            if loader.ParticleConn then loader.ParticleConn:Disconnect() end
             loader.Gui:Destroy()
         end
         
@@ -2845,4 +2947,4 @@ loader.KeyInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
-print("✨ Xynor Hub v3.0 initialized successfully")
+print(" Xynor Hub v3.0 initialized successfully")
