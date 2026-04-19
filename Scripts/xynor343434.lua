@@ -322,6 +322,7 @@ local function CreateLoader()
     local KeyFrame = Instance.new("Frame")
     KeyFrame.Size = UDim2.new(1, -40, 0, 90)
     KeyFrame.Position = UDim2.new(0, 20, 0, 175)
+    KeyFrame.BackgroundColor3 = Theme.White
     KeyFrame.BackgroundTransparency = 1
     KeyFrame.Visible = false
     KeyFrame.Parent = Container
@@ -2704,8 +2705,8 @@ end
 
 -- Loading sequence (waits for internal animation then checks saved key)
 task.spawn(function()
-    -- Wait for the internal loader animation to finish (~2.5s progress tween + buffer)
-    task.wait(3.2)
+    -- Wait for the internal loader animation to finish
+    task.wait(2.5)
     if not loader.Gui or not loader.Gui.Parent then return end
 
     local savedKey = KeySystem:GetSaved()
@@ -2718,6 +2719,7 @@ task.spawn(function()
         end
         runMainHub()
     else
+        task.wait(0.3)
         loader.KeyFrame.Visible = true
         tweenSmooth(loader.KeyFrame, 0.4, { BackgroundTransparency = 0 }):Play()
     end
