@@ -28,6 +28,22 @@ local function tweenSpring(obj, dur, props)
     return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Back, Enum.EasingDirection.Out), props)
 end
 
+local function tweenElastic(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), props)
+end
+
+local function tweenExpo(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), props)
+end
+
+local function tweenSine(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), props)
+end
+
+local function tweenLinear(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), props)
+end
+
 -- ═══════════════════════════════════════════════════════════════
 -- BLUR EFFECT CONTROLLER (Premium visual effects)
 -- ═══════════════════════════════════════════════════════════════
@@ -392,53 +408,89 @@ local function CreateLoader()
     local loadingDone = false
     
     task.spawn(function()
-        task.wait(0.1)
+        task.wait(0.05)
         Container.Visible = true
         
-        tweenSpring(containerUIScale, 0.6, { Scale = 1 }):Play()
+        tweenElastic(containerUIScale, 0.8, { Scale = 1 }):Play()
+        
+        task.wait(0.15)
+        tweenElastic(MainTitle, 0.6, { TextTransparency = 0, TextSize = 42 }):Play()
+        task.wait(0.1)
+        tweenSmooth(SubTitle, 0.5, { TextTransparency = 0 }):Play()
         
         task.wait(0.2)
-        tweenSpring(MainTitle, 0.7, { TextTransparency = 0, TextSize = 40 }):Play()
-        task.wait(0.15)
-        tweenSpring(SubTitle, 0.6, { TextTransparency = 0 }):Play()
-        task.wait(0.25)
-        tweenSmooth(ProgressBar, 2.0, { Size = UDim2.new(1, 0, 1, 0) }):Play()
-        tweenSmooth(ProgressText, 0.4, { TextTransparency = 0 }):Play()
         
-        task.wait(2.0)
-        loadingDone = true
-        
-        tweenSmooth(ProgressBg, 0.5, { BackgroundTransparency = 1, Position = UDim2.new(0, 40, 0, 90) }):Play()
-        tweenSmooth(ProgressBar, 0.5, { BackgroundTransparency = 1 }):Play()
-        tweenSmooth(ProgressText, 0.4, { TextTransparency = 1, Position = UDim2.new(0, 0, 0, 105) }):Play()
-        
-        task.wait(0.1)
-        tweenSmooth(DotsFrame, 0.6, { Position = UDim2.new(0.5, -30, 0, 120), BackgroundTransparency = 0.5 }):Play()
+        local loadTween = tweenSmooth(ProgressBar, 2.0, { Size = UDim2.new(1, 0, 1, 0) })
+        loadTween:Play()
         
         task.wait(0.3)
+        tweenSmooth(ProgressText, 0.3, { TextTransparency = 0 }):Play()
+        
+        task.wait(2.0)
+        loadTween:Cancel()
+        ProgressBar.Size = UDim2.new(1, 0, 1, 0)
+        loadingDone = true
+        
+        tweenSmooth(ProgressBg, 0.6, { BackgroundTransparency = 0.9, Position = UDim2.new(0, 40, 0, 70) }):Play()
+        tweenSmooth(ProgressBar, 0.4, { BackgroundTransparency = 1 }):Play()
+        tweenSmooth(ProgressText, 0.4, { TextTransparency = 1 }):Play()
+        tweenSmooth(glowLine, 0.3, { BackgroundTransparency = 1 }):Play()
+        tweenSmooth(MainTitle, 0.4, { TextTransparency = 0.3 }):Play()
+        tweenSmooth(SubTitle, 0.4, { TextTransparency = 0.3 }):Play()
+        
+        task.wait(0.15)
+        
+        local dotsTween = tweenSmooth(DotsFrame, 0.7, { 
+            Position = UDim2.new(0.5, -30, 0, 80), 
+            BackgroundTransparency = 0 
+        })
+        dotsTween:Play()
+        
+        for i, dot in ipairs(dots) do
+            task.wait(0.08)
+            tweenSmooth(dot, 0.3, { BackgroundTransparency = 0, Size = UDim2.fromOffset(10, 10) }):Play()
+        end
+        
+        task.wait(0.2)
+        
         KeyFrame.Visible = true
-        tweenSmooth(KeyFrame, 0.5, { BackgroundTransparency = 0 }):Play()
+        
+        local inputTween = tweenElastic(KeyFrame, 0.6, { BackgroundTransparency = 0 })
+        inputTween:Play()
+        
+        task.wait(0.1)
         tweenSmooth(KeyPrompt, 0.4, { TextTransparency = 0 }):Play()
-        tweenSmooth(InputBg, 0.4, { BackgroundTransparency = 0 }):Play()
+        task.wait(0.05)
+        
+        local inputBgTween = tweenSmooth(InputBg, 0.4, { BackgroundTransparency = 0 })
+        inputBgTween:Play()
+        
+        task.wait(0.05)
         tweenSmooth(inputStroke, 0.4, { Transparency = 0 }):Play()
         tweenSmooth(KeyInput, 0.4, { TextTransparency = 0 }):Play()
-        tweenSmooth(ValidateBtn, 0.4, { TextTransparency = 0 }):Play()
+        
+        task.wait(0.08)
+        tweenElastic(ValidateBtn, 0.5, { TextTransparency = 0 }):Play()
     end)
     
     task.spawn(function()
+        local dotIndex = 1
         while Container.Parent and not loadingDone do
-            for _, dot in pairs(dots) do
-                tweenSpring(dot, 0.4, { BackgroundTransparency = 0.3, Size = UDim2.fromOffset(10, 10) }):Play()
-                task.wait(0.15)
-                tweenSpring(dot, 0.3, { BackgroundTransparency = 0, Size = UDim2.fromOffset(8, 8) }):Play()
-                task.wait(0.15)
+            local dot = dots[dotIndex]
+            if dot then
+                tweenElastic(dot, 0.3, { BackgroundTransparency = 0.2, Size = UDim2.fromOffset(11, 11) }):Play()
             end
-            task.wait(0.5)
+            task.wait(0.12)
+            if dot then
+                tweenSmooth(dot, 0.25, { BackgroundTransparency = 0, Size = UDim2.fromOffset(8, 8) }):Play()
+            end
+            dotIndex = (dotIndex % 3) + 1
+            task.wait(0.08)
         end
     end)
     
     ValidateBtn.MouseEnter:Connect(function()
-        tweenSmooth(ValidateBtn, 0.2, { BackgroundColor3 = Theme.PrimaryDark, Size = UDim2.new(1, 4, 0, 36) }):Play()
+        tweenElastic(ValidateBtn, 0.25, { BackgroundColor3 = Theme.PrimaryDark, Size = UDim2.new(1, 6, 0, 38) }):Play()
     end)
     
     ValidateBtn.MouseLeave:Connect(function()
@@ -494,7 +546,7 @@ local function BuildMainWindow()
     
     -- Main frame (now on top of glass)
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.fromOffset(0, 0)
+    MainFrame.Size = UDim2.fromOffset(50, 50)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.BackgroundColor3 = Theme.White
@@ -647,9 +699,9 @@ local function BuildMainWindow()
     minStroke.Parent = MinimizeBtn
     
     MinimizeBtn.MouseEnter:Connect(function()
-        tweenSmooth(MinimizeBtn, 0.2, { 
+        tweenElastic(MinimizeBtn, 0.25, { 
             BackgroundColor3 = Theme.BorderHover,
-            Size = UDim2.fromOffset(30, 30)
+            Size = UDim2.fromOffset(32, 32)
         }):Play()
     end)
     MinimizeBtn.MouseLeave:Connect(function()
@@ -681,9 +733,9 @@ local function BuildMainWindow()
     closeStroke.Parent = CloseBtn
     
     CloseBtn.MouseEnter:Connect(function()
-        tweenSmooth(CloseBtn, 0.2, { 
+        tweenElastic(CloseBtn, 0.25, { 
             BackgroundColor3 = Theme.AccentDark,
-            Size = UDim2.fromOffset(30, 30)
+            Size = UDim2.fromOffset(32, 32)
         }):Play()
     end)
     CloseBtn.MouseLeave:Connect(function()
@@ -1080,7 +1132,7 @@ local function BuildMainWindow()
                 tweenSmooth(toggleBg, 0.2, { 
                     BackgroundColor3 = v and Theme.Primary or Theme.Border 
                 }):Play()
-                tweenSpring(knob, 0.25, { 
+                tweenElastic(knob, 0.3, { 
                     Position = v and UDim2.fromOffset(21, 3) or UDim2.fromOffset(3, 3)
                 }):Play()
                 if opts.Callback then opts.Callback(v) end
@@ -1093,9 +1145,9 @@ local function BuildMainWindow()
             clickArea.Parent = container
             
             clickArea.MouseButton1Click:Connect(function()
-                tweenSmooth(hover, 0.1, { BackgroundTransparency = 0.85 }):Play()
-                task.delay(0.1, function()
-                    tweenSmooth(hover, 0.2, { BackgroundTransparency = 0.95 }):Play()
+                tweenSmooth(hover, 0.1, { BackgroundTransparency = 0.8 }):Play()
+                task.delay(0.12, function()
+                    tweenSmooth(hover, 0.25, { BackgroundTransparency = 0.95 }):Play()
                 end)
                 toggleObj:Set(not state)
             end)
@@ -1285,13 +1337,13 @@ local function BuildMainWindow()
             arrow.Parent = container
             
             btnArea.MouseEnter:Connect(function()
-                tweenSmooth(container, 0.2, { 
+                tweenElastic(container, 0.25, { 
                     BackgroundColor3 = Theme.PanelHover,
-                    Size = UDim2.new(1, 0, 0, 46)
+                    Size = UDim2.new(1, 0, 0, 48)
                 }):Play()
-                tweenSmooth(arrow, 0.2, { 
+                tweenElastic(arrow, 0.2, { 
                     TextColor3 = Theme.PrimaryDark,
-                    Position = UDim2.new(1, -26, 0.5, -9)
+                    Position = UDim2.new(1, -24, 0.5, -9)
                 }):Play()
             end)
             
@@ -1307,11 +1359,11 @@ local function BuildMainWindow()
             end)
             
             btnArea.MouseButton1Down:Connect(function()
-                tweenSpring(container, 0.07, { Size = UDim2.new(1, 0, 0, 40) }):Play()
+                tweenElastic(container, 0.08, { Size = UDim2.new(1, 0, 0, 40) }):Play()
             end)
             
             btnArea.MouseButton1Up:Connect(function()
-                tweenSpring(container, 0.15, { Size = UDim2.new(1, 0, 0, 44) }):Play()
+                tweenSmooth(container, 0.15, { Size = UDim2.new(1, 0, 0, 44) }):Play()
             end)
             
             btnArea.MouseButton1Click:Connect(function()
@@ -1504,32 +1556,25 @@ local function BuildMainWindow()
         MainFrame.Visible = true
         GlassOverlay.Visible = true
         
-        local mainScale = Instance.new("UIScale")
-        mainScale.Scale = 0.8
-        mainScale.Parent = MainFrame
+        tweenElastic(MainFrame, 0.8, { 
+            Size = UDim2.fromOffset(winW, winH),
+            BackgroundTransparency = 0
+        }):Play()
         
-        local glassScale = Instance.new("UIScale")
-        glassScale.Scale = 0.85
-        glassScale.Parent = GlassOverlay
+        tweenExpo(GlassOverlay, 0.6, { BackgroundTransparency = 0.7 }):Play()
         
-        tweenSmooth(GlassOverlay, 0.5, { BackgroundTransparency = 0.7 }):Play()
+        task.wait(0.25)
         
-        task.wait(0.05)
-        
-        tweenSpring(mainScale, 0.7, { Scale = 1 }):Play()
-        tweenSpring(glassScale, 0.7, { Scale = 1 }):Play()
-        
-        task.wait(0.15)
-        
-        tweenSmooth(Topbar, 0.4, { BackgroundTransparency = 0 }):Play()
-        tweenSmooth(TitleLbl, 0.4, { TextTransparency = 0 }):Play()
-        tweenSmooth(CreditLbl, 0.4, { TextTransparency = 0 }):Play()
+        tweenSmooth(Topbar, 0.35, { BackgroundTransparency = 0 }):Play()
         
         task.wait(0.08)
-        
-        tweenSmooth(Sidebar, 0.35, { BackgroundTransparency = 0 }):Play()
+        tweenElastic(TitleLbl, 0.4, { TextTransparency = 0, TextSize = 20 }):Play()
+        task.wait(0.05)
+        tweenSmooth(CreditLbl, 0.35, { TextTransparency = 0 }):Play()
         
         task.wait(0.1)
+        
+        tweenSmooth(Sidebar, 0.4, { BackgroundTransparency = 0 }):Play()
         
         local sideButtons = {}
         for _, child in pairs(SidebarInner:GetChildren()) do
@@ -1540,12 +1585,12 @@ local function BuildMainWindow()
         
         for i, btn in ipairs(sideButtons) do
             task.spawn(function()
-                task.wait(i * 0.05)
-                tweenSmooth(btn, 0.3, { BackgroundTransparency = 0 }):Play()
+                task.wait(i * 0.06)
+                tweenElastic(btn, 0.35, { BackgroundTransparency = 0 }):Play()
             end)
         end
         
-        task.wait(0.3)
+        task.wait(0.35)
         
         for _, p in ipairs(PageHolder:GetChildren()) do
             if p:IsA("Frame") and p.Visible then
@@ -1561,10 +1606,10 @@ local function BuildMainWindow()
                                             el.TextTransparency = 1
                                         end
                                         task.spawn(function()
-                                            task.wait(j * 0.05)
-                                            tweenSmooth(el, 0.25, { BackgroundTransparency = 0 }):Play()
+                                            task.wait(j * 0.04)
+                                            tweenSmooth(el, 0.2, { BackgroundTransparency = 0 }):Play()
                                             if el:IsA("TextLabel") or el:IsA("TextButton") then
-                                                tweenSmooth(el, 0.25, { TextTransparency = 0 }):Play()
+                                                tweenSmooth(el, 0.2, { TextTransparency = 0 }):Play()
                                             end
                                         end)
                                     end
@@ -2738,25 +2783,30 @@ local function doValidateKey()
         loader.Feedback.Text = "✓ Access granted"
         loader.Feedback.TextColor3 = Theme.Success
         
-        task.wait(0.3)
+        task.wait(0.2)
         
-        tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenElastic(loader.Container, 0.5, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
         
-        task.wait(0.5)
+        tweenSmooth(loader.Container, 0.4, { Rotation = 5 }):Play()
+        
+        task.wait(0.4)
+        
+        setBlur(0, 0.4)
         
         if loader.Gui and loader.Gui.Parent then
             loader.Gui:Destroy()
         end
         
-        setBlur(0, 0.3)
+        task.wait(0.15)
         
         runMainHub()
     else
         loader.Feedback.Text = "✗ Invalid key"
         loader.Feedback.TextColor3 = Theme.Danger
-        tweenSpring(loader.SubmitBtn, 0.15, { Size = UDim2.new(1, 6, 0, 36) }):Play()
-        task.wait(0.08)
-        tweenSpring(loader.SubmitBtn, 0.2, { Size = UDim2.new(1, 0, 0, 34) }):Play()
+        tweenElastic(loader.SubmitBtn, 0.15, { Size = UDim2.new(1, 8, 0, 38) }):Play()
+        task.wait(0.1)
+        tweenSmooth(loader.SubmitBtn, 0.2, { Size = UDim2.new(1, 0, 0, 34) }):Play()
     end
 end
 
@@ -2768,17 +2818,20 @@ task.spawn(function()
     if savedKey and KeySystem:Check(savedKey) then
         loader.Feedback.Text = "✓ Key verified"
         loader.Feedback.TextColor3 = Theme.Success
-        task.wait(0.3)
+        task.wait(0.2)
         
-        tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenElastic(loader.Container, 0.5, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
         
-        task.wait(0.5)
+        task.wait(0.4)
+        
+        setBlur(0, 0.4)
         
         if loader.Gui and loader.Gui.Parent then
             loader.Gui:Destroy()
         end
         
-        setBlur(0, 0.3)
+        task.wait(0.15)
         
         runMainHub()
     end
@@ -2792,4 +2845,4 @@ loader.KeyInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
-print("Xynor Hub v3.0 initialized successfully")
+print("✨ Xynor Hub v3.0 initialized successfully")
