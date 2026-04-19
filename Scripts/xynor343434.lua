@@ -142,10 +142,8 @@ local function CreateLoader()
     ScreenGui.ResetOnSpawn = false
     ScreenGui.Parent = Parent
     
-    -- Apply blur effect
     setBlur(8, 0)
     
-    -- Main container (clean card design)
     local Container = Instance.new("Frame")
     Container.Size = UDim2.fromOffset(420, 320)
     Container.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -163,7 +161,6 @@ local function CreateLoader()
     cCorner.CornerRadius = UDim.new(0, 24)
     cCorner.Parent = Container
     
-    -- Soft multi-layer shadow for depth
     local shadow1 = Instance.new("Frame")
     shadow1.Size = UDim2.new(1, 6, 1, 6)
     shadow1.Position = UDim2.new(0, -3, 0, -3)
@@ -190,7 +187,6 @@ local function CreateLoader()
     s2C.CornerRadius = UDim.new(0, 30)
     s2C.Parent = shadow2
     
-    -- Top gradient accent with glow
     local topAccent = Instance.new("Frame")
     topAccent.Size = UDim2.new(1, 0, 0, 5)
     topAccent.Position = UDim2.new(0, 0, 0, 0)
@@ -202,7 +198,6 @@ local function CreateLoader()
     taC.CornerRadius = UDim.new(0, 4)
     taC.Parent = topAccent
     
-    -- Glow line below accent
     local glowLine = Instance.new("Frame")
     glowLine.Size = UDim2.new(1, -40, 0, 2)
     glowLine.Position = UDim2.new(0, 20, 0, 8)
@@ -215,14 +210,12 @@ local function CreateLoader()
     glC.CornerRadius = UDim.new(1, 0)
     glC.Parent = glowLine
     
-    -- Logo section with decorative elements
     local LogoSection = Instance.new("Frame")
     LogoSection.Size = UDim2.new(1, 0, 0, 100)
     LogoSection.Position = UDim2.new(0, 0, 0, 35)
     LogoSection.BackgroundTransparency = 1
     LogoSection.Parent = Container
     
-    -- Decorative circles
     for i = 1, 3 do
         local decor = Instance.new("Frame")
         decor.Size = UDim2.fromOffset(4 + i*2, 4 + i*2)
@@ -261,7 +254,6 @@ local function CreateLoader()
     SubTitle.TextTransparency = 1
     SubTitle.Parent = LogoSection
     
-    -- Progress bar
     local ProgressBg = Instance.new("Frame")
     ProgressBg.Size = UDim2.new(1, -80, 0, 6)
     ProgressBg.Position = UDim2.new(0, 40, 0, 110)
@@ -295,7 +287,6 @@ local function CreateLoader()
     ProgressText.TextTransparency = 1
     ProgressText.Parent = Container
     
-    -- Loading dots
     local DotsFrame = Instance.new("Frame")
     DotsFrame.Size = UDim2.new(0, 60, 0, 20)
     DotsFrame.Position = UDim2.new(0.5, -30, 0, 150)
@@ -318,7 +309,6 @@ local function CreateLoader()
         dots[i] = dot
     end
     
-    -- Key Input Section
     local KeyFrame = Instance.new("Frame")
     KeyFrame.Size = UDim2.new(1, -40, 0, 90)
     KeyFrame.Position = UDim2.new(0, 20, 0, 175)
@@ -336,6 +326,7 @@ local function CreateLoader()
     KeyPrompt.Font = Enum.Font.GothamMedium
     KeyPrompt.TextSize = 12
     KeyPrompt.TextXAlignment = Enum.TextXAlignment.Center
+    KeyPrompt.TextTransparency = 1
     KeyPrompt.Parent = KeyFrame
     
     local InputBg = Instance.new("Frame")
@@ -343,6 +334,7 @@ local function CreateLoader()
     InputBg.Position = UDim2.new(0, 0, 0, 22)
     InputBg.BackgroundColor3 = Theme.WarmWhite
     InputBg.BorderSizePixel = 0
+    InputBg.BackgroundTransparency = 1
     InputBg.Parent = KeyFrame
     
     local inputCorner = Instance.new("UICorner")
@@ -352,6 +344,7 @@ local function CreateLoader()
     local inputStroke = Instance.new("UIStroke")
     inputStroke.Color = Theme.Border
     inputStroke.Thickness = 1.5
+    inputStroke.Transparency = 1
     inputStroke.Parent = InputBg
     
     local KeyInput = Instance.new("TextBox")
@@ -366,6 +359,7 @@ local function CreateLoader()
     KeyInput.TextSize = 14
     KeyInput.TextXAlignment = Enum.TextXAlignment.Center
     KeyInput.ClearTextOnFocus = false
+    KeyInput.TextTransparency = 1
     KeyInput.Parent = InputBg
     
     local ValidateBtn = Instance.new("TextButton")
@@ -377,6 +371,7 @@ local function CreateLoader()
     ValidateBtn.Font = Enum.Font.GothamSemibold
     ValidateBtn.TextSize = 13
     ValidateBtn.BorderSizePixel = 0
+    ValidateBtn.TextTransparency = 1
     ValidateBtn.Parent = KeyFrame
     
     local btnCorner = Instance.new("UICorner")
@@ -394,41 +389,44 @@ local function CreateLoader()
     FeedbackLabel.TextXAlignment = Enum.TextXAlignment.Center
     FeedbackLabel.Parent = ValidateBtn
     
-    -- Animaciones de entrada premium
+    local loadingDone = false
+    
     task.spawn(function()
         task.wait(0.1)
         Container.Visible = true
         
-        -- Pop-in con escala
-        tweenSpring(containerUIScale, 0.6, { 
-            Scale = 1
-        }):Play()
+        tweenSpring(containerUIScale, 0.6, { Scale = 1 }):Play()
         
         task.wait(0.2)
-        tweenSpring(MainTitle, 0.7, { 
-            TextTransparency = 0,
-            TextSize = 40
-        }):Play()
+        tweenSpring(MainTitle, 0.7, { TextTransparency = 0, TextSize = 40 }):Play()
         task.wait(0.15)
         tweenSpring(SubTitle, 0.6, { TextTransparency = 0 }):Play()
         task.wait(0.25)
-        tweenSmooth(ProgressBar, 2.2, { Size = UDim2.new(1, 0, 1, 0) }):Play()
+        tweenSmooth(ProgressBar, 2.0, { Size = UDim2.new(1, 0, 1, 0) }):Play()
         tweenSmooth(ProgressText, 0.4, { TextTransparency = 0 }):Play()
         
-        -- Animar glow line
+        task.wait(2.0)
+        loadingDone = true
+        
+        tweenSmooth(ProgressBg, 0.5, { BackgroundTransparency = 1, Position = UDim2.new(0, 40, 0, 90) }):Play()
+        tweenSmooth(ProgressBar, 0.5, { BackgroundTransparency = 1 }):Play()
+        tweenSmooth(ProgressText, 0.4, { TextTransparency = 1, Position = UDim2.new(0, 0, 0, 105) }):Play()
+        
+        task.wait(0.1)
+        tweenSmooth(DotsFrame, 0.6, { Position = UDim2.new(0.5, -30, 0, 120), BackgroundTransparency = 0.5 }):Play()
+        
         task.wait(0.3)
-        local glowPulse = 0
-        while Container.Parent do
-            glowPulse = glowPulse + 0.02
-            local alpha = 0.4 + math.sin(glowPulse) * 0.2
-            tweenSmooth(glowLine, 0.3, { BackgroundTransparency = alpha }):Play()
-            task.wait(0.3)
-        end
+        KeyFrame.Visible = true
+        tweenSmooth(KeyFrame, 0.5, { BackgroundTransparency = 0 }):Play()
+        tweenSmooth(KeyPrompt, 0.4, { TextTransparency = 0 }):Play()
+        tweenSmooth(InputBg, 0.4, { BackgroundTransparency = 0 }):Play()
+        tweenSmooth(inputStroke, 0.4, { Transparency = 0 }):Play()
+        tweenSmooth(KeyInput, 0.4, { TextTransparency = 0 }):Play()
+        tweenSmooth(ValidateBtn, 0.4, { TextTransparency = 0 }):Play()
     end)
     
-    -- Dots animation
     task.spawn(function()
-        while Container.Parent do
+        while Container.Parent and not loadingDone do
             for _, dot in pairs(dots) do
                 tweenSpring(dot, 0.4, { BackgroundTransparency = 0.3, Size = UDim2.fromOffset(10, 10) }):Play()
                 task.wait(0.15)
@@ -439,19 +437,12 @@ local function CreateLoader()
         end
     end)
     
-    -- Hover effects
     ValidateBtn.MouseEnter:Connect(function()
-        tweenSmooth(ValidateBtn, 0.2, { 
-            BackgroundColor3 = Theme.PrimaryDark,
-            Size = UDim2.new(1, 4, 0, 36)
-        }):Play()
+        tweenSmooth(ValidateBtn, 0.2, { BackgroundColor3 = Theme.PrimaryDark, Size = UDim2.new(1, 4, 0, 36) }):Play()
     end)
     
     ValidateBtn.MouseLeave:Connect(function()
-        tweenSmooth(ValidateBtn, 0.2, { 
-            BackgroundColor3 = Theme.Primary,
-            Size = UDim2.new(1, 0, 0, 34)
-        }):Play()
+        tweenSmooth(ValidateBtn, 0.2, { BackgroundColor3 = Theme.Primary, Size = UDim2.new(1, 0, 0, 34) }):Play()
     end)
     
     return {
@@ -462,7 +453,8 @@ local function CreateLoader()
         Container = Container,
         KeyFrame = KeyFrame,
         ProgressText = ProgressText,
-        ProgressBar = ProgressBar
+        ProgressBar = ProgressBar,
+        IsLoadingDone = function() return loadingDone end
     }
 end
 
@@ -2680,59 +2672,67 @@ end
 
 local loader = CreateLoader()
 
--- Shared validate function (avoids :Fire() which is invalid in Luau)
 local function doValidateKey()
-    task.spawn(function()
-        local key = loader.KeyInput.Text
-        if KeySystem:Check(key) then
-            KeySystem:Save(key)
-            loader.Feedback.Text = "✓ Access granted"
-            loader.Feedback.TextColor3 = Theme.Success
-            task.wait(0.5)
-            if loader.Gui and loader.Gui.Parent then
-                loader.Gui:Destroy()
-            end
-            runMainHub()
-        else
-            loader.Feedback.Text = "✗ Invalid key"
-            loader.Feedback.TextColor3 = Theme.Danger
-            tweenSpring(loader.SubmitBtn, 0.15, { Position = UDim2.new(0, 6, 0.5, -17) }):Play()
-            task.wait(0.08)
-            tweenSpring(loader.SubmitBtn, 0.2, { Position = UDim2.new(0, 0, 0.5, -17) }):Play()
+    if not loader.Gui or not loader.Gui.Parent then return end
+    
+    local key = loader.KeyInput.Text
+    if KeySystem:Check(key) then
+        KeySystem:Save(key)
+        loader.Feedback.Text = "✓ Access granted"
+        loader.Feedback.TextColor3 = Theme.Success
+        
+        task.wait(0.3)
+        
+        tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        
+        task.wait(0.5)
+        
+        if loader.Gui and loader.Gui.Parent then
+            loader.Gui:Destroy()
         end
-    end)
+        
+        setBlur(0, 0.3)
+        
+        runMainHub()
+    else
+        loader.Feedback.Text = "✗ Invalid key"
+        loader.Feedback.TextColor3 = Theme.Danger
+        tweenSpring(loader.SubmitBtn, 0.15, { Size = UDim2.new(1, 6, 0, 36) }):Play()
+        task.wait(0.08)
+        tweenSpring(loader.SubmitBtn, 0.2, { Size = UDim2.new(1, 0, 0, 34) }):Play()
+    end
 end
 
--- Loading sequence (waits for internal animation then checks saved key)
 task.spawn(function()
-    -- Wait for the internal loader animation to finish
-    task.wait(2.5)
+    task.wait(4.5)
     if not loader.Gui or not loader.Gui.Parent then return end
-
+    
     local savedKey = KeySystem:GetSaved()
     if savedKey and KeySystem:Check(savedKey) then
         loader.Feedback.Text = "✓ Key verified"
         loader.Feedback.TextColor3 = Theme.Success
-        task.wait(0.6)
+        task.wait(0.3)
+        
+        tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        
+        task.wait(0.5)
+        
         if loader.Gui and loader.Gui.Parent then
             loader.Gui:Destroy()
         end
+        
+        setBlur(0, 0.3)
+        
         runMainHub()
-    else
-        task.wait(0.3)
-        loader.KeyFrame.Visible = true
-        tweenSmooth(loader.KeyFrame, 0.4, { BackgroundTransparency = 0 }):Play()
     end
 end)
 
--- Key validation handler
 loader.SubmitBtn.MouseButton1Click:Connect(doValidateKey)
 
--- Enter key submit (uses shared function instead of :Fire())
 loader.KeyInput.FocusLost:Connect(function(enterPressed)
     if enterPressed then
         doValidateKey()
     end
 end)
 
-print("✨ Xynor Hub v3.0 initialized successfully")
+print("Xynor Hub v3.0 initialized successfully")
