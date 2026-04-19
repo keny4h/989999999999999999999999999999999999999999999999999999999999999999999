@@ -1,7 +1,8 @@
 --[[
     ═══════════════════════════════════════════════════════════════
-                         XYNOR HUB v3.0
-                    LOADER → ICONO → UI PRINCIPAL
+                    XYNOR HUB 3.0 - COMPLETE REDESIGN
+                    Premium UI/UX · Modern · Professional
+                    Loader → Draggable Icon → Main UI
     ═══════════════════════════════════════════════════════════════
 --]]
 
@@ -9,36 +10,61 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
 -- ═══════════════════════════════════════════════════════════════
--- TWEENS
+-- EASING FUNCTIONS
 -- ═══════════════════════════════════════════════════════════════
-local function tween(obj, dur, props)
+local function tweenSmooth(obj, dur, props)
     return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props)
 end
 
-local smooth = tween
-local elastic = function(o,d,p) return tween(o,d,p,Enum.EasingStyle.Elastic) end
-local spring = function(o,d,p) return tween(o,d,p,Enum.EasingStyle.Back) end
+local function tweenBounce(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), props)
+end
+
+local function tweenSpring(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Back, Enum.EasingDirection.Out), props)
+end
 
 -- ═══════════════════════════════════════════════════════════════
--- THEME
+-- BLUR EFFECT
+-- ═══════════════════════════════════════════════════════════════
+local BlurMod = Instance.new("BlurEffect")
+BlurMod.Size = 0
+BlurMod.Parent = Lighting
+
+local function setBlur(intensity, duration)
+    duration = duration or 0.3
+    tweenSmooth(BlurMod, duration, { Size = intensity }):Play()
+end
+
+-- ═══════════════════════════════════════════════════════════════
+-- THEME (Premium Pastel)
 -- ═══════════════════════════════════════════════════════════════
 local Theme = {
     Primary = Color3.fromRGB(147, 112, 219),
     PrimaryDark = Color3.fromRGB(125, 80, 190),
+    PrimaryLight = Color3.fromRGB(171, 145, 235),
+    Accent = Color3.fromRGB(255, 143, 133),
+    AccentDark = Color3.fromRGB(255, 112, 100),
     White = Color3.fromRGB(255, 255, 255),
+    Cream = Color3.fromRGB(255, 252, 245),
     WarmWhite = Color3.fromRGB(248, 246, 243),
     LightGray = Color3.fromRGB(240, 238, 235),
     TextPrimary = Color3.fromRGB(55, 45, 65),
     TextSecondary = Color3.fromRGB(95, 85, 115),
     TextMuted = Color3.fromRGB(140, 130, 150),
     Border = Color3.fromRGB(220, 215, 205),
+    BorderHover = Color3.fromRGB(200, 195, 185),
     Panel = Color3.fromRGB(255, 253, 250),
+    PanelHover = Color3.fromRGB(252, 248, 244),
     Success = Color3.fromRGB(129, 199, 132),
     Danger = Color3.fromRGB(239, 154, 154),
+    Warning = Color3.fromRGB(255, 211, 105),
 }
 
 -- ═══════════════════════════════════════════════════════════════
@@ -82,97 +108,241 @@ function KeySystem:Check(key)
 end
 
 -- ═══════════════════════════════════════════════════════════════
--- LOADER
+-- LOADER (COMPLEX PREMIUM VERSION)
 -- ═══════════════════════════════════════════════════════════════
 local function CreateLoader()
     local Parent = getGuiParent()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XynorLoader"
+    ScreenGui.Name = "XynorLoader_v3"
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.ResetOnSpawn = false
     ScreenGui.Parent = Parent
 
-    -- Container
+    setBlur(8, 0)
+
+    -- Partículas flotantes de colores
+    local particleColors = {
+        Theme.Primary, Theme.Accent,
+        Color3.fromRGB(129, 199, 132),
+        Color3.fromRGB(255, 211, 105),
+        Color3.fromRGB(171, 145, 235),
+        Color3.fromRGB(255, 183, 178),
+        Color3.fromRGB(159, 168, 218),
+        Color3.fromRGB(144, 202, 249),
+    }
+
+    local function createParticle()
+        local shapes = {"Circle", "Triangle", "Star"}
+        local shapeType = shapes[math.random(#shapes)]
+        local size = math.random(15, 45)
+        local startX = math.random(-300, 300)
+        local startY = math.random(-200, 200)
+
+        local particle
+        if shapeType == "Circle" then
+            particle = Instance.new("Frame")
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0.5, 0)
+            corner.Parent = particle
+        elseif shapeType == "Triangle" then
+            particle = Instance.new("Frame")
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 3)
+            corner.Parent = particle
+        else
+            particle = Instance.new("Frame")
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 4)
+            corner.Parent = particle
+        end
+
+        particle.Size = UDim2.fromOffset(size, size)
+        particle.Position = UDim2.new(0.5, startX, 0.5, startY)
+        particle.BackgroundColor3 = particleColors[math.random(#particleColors)]
+        particle.BackgroundTransparency = 1
+        particle.BorderSizePixel = 0
+        particle.AnchorPoint = Vector2.new(0.5, 0.5)
+        particle.Parent = ScreenGui
+
+        local rotationSpeed = math.random(100, 300)
+        local floatSpeed = math.random(2, 4)
+        local startTime = os.clock()
+        local duration = math.random(2, 4)
+
+        tweenSmooth(particle, 0.5, { BackgroundTransparency = 0.6 }):Play()
+
+        local conn = RunService.RenderStepped:Connect(function()
+            if not particle.Parent then
+                conn:Disconnect()
+                return
+            end
+            local elapsed = os.clock() - startTime
+            if elapsed > duration then
+                tweenSmooth(particle, 0.4, { BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 0) }):Play()
+                task.wait(0.5)
+                particle:Destroy()
+                conn:Disconnect()
+                return
+            end
+            local yOffset = math.sin(elapsed * floatSpeed) * 80
+            local newY = startY + yOffset - (elapsed * 30)
+            particle.Position = UDim2.new(0.5, startX + math.sin(elapsed * 2) * 30, 0.5, newY)
+            particle.Rotation = elapsed * rotationSpeed
+        end)
+    end
+
+    -- Generador de partículas
+    task.spawn(function()
+        local frameCount = 0
+        while RunService.RenderStepped:Wait() do
+            frameCount = frameCount + 1
+            if frameCount % 6 == 0 then
+                task.spawn(createParticle)
+            end
+        end
+    end)
+
+    -- Container principal
     local Container = Instance.new("Frame")
-    Container.Size = UDim2.fromOffset(380, 280)
+    Container.Size = UDim2.fromOffset(420, 320)
     Container.Position = UDim2.new(0.5, 0, 0.5, 0)
     Container.BackgroundColor3 = Theme.White
     Container.BorderSizePixel = 0
+    Container.ClipsDescendants = true
     Container.AnchorPoint = Vector2.new(0.5, 0.5)
     Container.Visible = false
     Container.Parent = ScreenGui
 
+    local cScale = Instance.new("UIScale")
+    cScale.Scale = 0.85
+    cScale.Parent = Container
+
     local cCorner = Instance.new("UICorner")
-    cCorner.CornerRadius = UDim.new(0, 20)
+    cCorner.CornerRadius = UDim.new(0, 24)
     cCorner.Parent = Container
 
-    local shadow = Instance.new("Frame")
-    shadow.Size = UDim2.new(1, 8, 1, 8)
-    shadow.Position = UDim2.new(0, -4, 0, -4)
-    shadow.BackgroundColor3 = Color3.fromRGB(160, 155, 150)
-    shadow.BackgroundTransparency = 0.9
-    shadow.BorderSizePixel = 0
-    shadow.ZIndex = Container.ZIndex - 1
-    shadow.Parent = Container
-    local sc = Instance.new("UICorner"); sc.CornerRadius = UDim.new(0, 24); sc.Parent = shadow
+    -- Sombras multilayer
+    local shadow1 = Instance.new("Frame")
+    shadow1.Size = UDim2.new(1, 6, 1, 6)
+    shadow1.Position = UDim2.new(0, -3, 0, -3)
+    shadow1.BackgroundColor3 = Color3.fromRGB(180, 175, 170)
+    shadow1.BackgroundTransparency = 0.88
+    shadow1.BorderSizePixel = 0
+    shadow1.ZIndex = Container.ZIndex - 2
+    shadow1.Parent = Container
 
+    local s1C = Instance.new("UICorner")
+    s1C.CornerRadius = UDim.new(0, 28)
+    s1C.Parent = shadow1
+
+    local shadow2 = Instance.new("Frame")
+    shadow2.Size = UDim2.new(1, 12, 1, 12)
+    shadow2.Position = UDim2.new(0, -6, 0, -6)
+    shadow2.BackgroundColor3 = Color3.fromRGB(160, 155, 150)
+    shadow2.BackgroundTransparency = 0.92
+    shadow2.BorderSizePixel = 0
+    shadow2.ZIndex = Container.ZIndex - 3
+    shadow2.Parent = Container
+
+    local s2C = Instance.new("UICorner")
+    s2C.CornerRadius = UDim.new(0, 30)
+    s2C.Parent = shadow2
+
+    -- Top accent con glow
     local topAccent = Instance.new("Frame")
-    topAccent.Size = UDim2.new(1, 0, 0, 4)
+    topAccent.Size = UDim2.new(1, 0, 0, 5)
     topAccent.Position = UDim2.new(0, 0, 0, 0)
     topAccent.BackgroundColor3 = Theme.Primary
     topAccent.BorderSizePixel = 0
     topAccent.Parent = Container
 
+    local taC = Instance.new("UICorner")
+    taC.CornerRadius = UDim.new(0, 4)
+    taC.Parent = topAccent
+
+    local glowLine = Instance.new("Frame")
+    glowLine.Size = UDim2.new(1, -40, 0, 2)
+    glowLine.Position = UDim2.new(0, 20, 0, 8)
+    glowLine.BackgroundColor3 = Theme.Primary
+    glowLine.BorderSizePixel = 0
+    glowLine.BackgroundTransparency = 0.5
+    glowLine.Parent = Container
+
+    local glC = Instance.new("UICorner")
+    glC.CornerRadius = UDim.new(1, 0)
+    glC.Parent = glowLine
+
     -- Logo section
     local LogoSection = Instance.new("Frame")
-    LogoSection.Size = UDim2.new(1, 0, 0, 80)
-    LogoSection.Position = UDim2.new(0, 0, 0, 20)
+    LogoSection.Size = UDim2.new(1, 0, 0, 100)
+    LogoSection.Position = UDim2.new(0, 0, 0, 35)
     LogoSection.BackgroundTransparency = 1
     LogoSection.Parent = Container
 
-    local MainTitle = LogoSection:FindFirstChildWhichIsA("TextLabel") or Instance.new("TextLabel")
+    -- Decoraciones
+    for i = 1, 3 do
+        local decor = Instance.new("Frame")
+        decor.Size = UDim2.fromOffset(4 + i*2, 4 + i*2)
+        decor.Position = UDim2.new(0, 30 - i*8, 0, 90 - i*6)
+        decor.BackgroundColor3 = Theme.Primary
+        decor.BackgroundTransparency = 0.7 - i*0.15
+        decor.BorderSizePixel = 0
+        decor.Parent = LogoSection
+
+        local dc = Instance.new("UICorner")
+        dc.CornerRadius = UDim.new(1, 0)
+        dc.Parent = decor
+    end
+
+    local MainTitle = Instance.new("TextLabel")
     MainTitle.Size = UDim2.new(1, -60, 0.5, 0)
-    MainTitle.Position = UDim2.new(0, 30, 0, 0)
+    MainTitle.Position = UDim2.new(0, 30, 0, 8)
     MainTitle.BackgroundTransparency = 1
     MainTitle.Text = "XYNOR"
     MainTitle.TextColor3 = Theme.TextPrimary
     MainTitle.Font = Enum.Font.GothamBlack
-    MainTitle.TextSize = 30
+    MainTitle.TextSize = 38
     MainTitle.TextXAlignment = Enum.TextXAlignment.Left
     MainTitle.TextTransparency = 1
     MainTitle.Parent = LogoSection
 
     local SubTitle = Instance.new("TextLabel")
-    SubTitle.Size = UDim2.new(1, -60, 0, 18)
-    SubTitle.Position = UDim2.new(0, 30, 0.5, 0)
+    SubTitle.Size = UDim2.new(1, -60, 0, 20)
+    SubTitle.Position = UDim2.new(0, 30, 0.5, -5)
     SubTitle.BackgroundTransparency = 1
     SubTitle.Text = "Premium Hub v3"
-    SubTitle.TextColor3 = Theme.Primary
+    SubTitle.TextColor3 = Theme.Accent
     SubTitle.Font = Enum.Font.GothamMedium
-    SubTitle.TextSize = 12
+    SubTitle.TextSize = 14
     SubTitle.TextXAlignment = Enum.TextXAlignment.Left
     SubTitle.TextTransparency = 1
     SubTitle.Parent = LogoSection
 
-    -- Progress bar
+    -- Progress Bar
     local ProgressBg = Instance.new("Frame")
-    ProgressBg.Size = UDim2.new(1, -80, 0, 5)
-    ProgressBg.Position = UDim2.new(0, 40, 0, 105)
+    ProgressBg.Size = UDim2.new(1, -80, 0, 6)
+    ProgressBg.Position = UDim2.new(0, 40, 0, 110)
     ProgressBg.BackgroundColor3 = Theme.LightGray
     ProgressBg.BorderSizePixel = 0
     ProgressBg.Parent = Container
-    local pbc = Instance.new("UICorner"); pbc.CornerRadius = UDim.new(1, 0); pbc.Parent = ProgressBg
+
+    local pbC = Instance.new("UICorner")
+    pbC.CornerRadius = UDim.new(1, 0)
+    pbC.Parent = ProgressBg
 
     local ProgressBar = Instance.new("Frame")
     ProgressBar.Size = UDim2.new(0, 0, 1, 0)
     ProgressBar.BackgroundColor3 = Theme.Primary
     ProgressBar.BorderSizePixel = 0
     ProgressBar.Parent = ProgressBg
-    local pfc = Instance.new("UICorner"); pfc.CornerRadius = UDim.new(1, 0); pfc.Parent = ProgressBar
+
+    local pbFillCorner = Instance.new("UICorner")
+    pbFillCorner.CornerRadius = UDim.new(1, 0)
+    pbFillCorner.Parent = ProgressBar
 
     local ProgressText = Instance.new("TextLabel")
-    ProgressText.Size = UDim2.new(1, 0, 0, 18)
-    ProgressText.Position = UDim2.new(0, 0, 0, 118)
+    ProgressText.Size = UDim2.new(1, 0, 0, 20)
+    ProgressText.Position = UDim2.new(0, 0, 0, 125)
     ProgressText.BackgroundTransparency = 1
     ProgressText.Text = "Loading..."
     ProgressText.TextColor3 = Theme.TextSecondary
@@ -184,35 +354,38 @@ local function CreateLoader()
 
     -- Dots
     local DotsFrame = Instance.new("Frame")
-    DotsFrame.Size = UDim2.new(0, 50, 0, 12)
-    DotsFrame.Position = UDim2.new(0.5, -25, 0, 145)
+    DotsFrame.Size = UDim2.new(0, 60, 0, 20)
+    DotsFrame.Position = UDim2.new(0.5, -30, 0, 150)
     DotsFrame.BackgroundTransparency = 1
     DotsFrame.Parent = Container
 
     local dots = {}
     for i = 1, 3 do
         local dot = Instance.new("Frame")
-        dot.Size = UDim2.fromOffset(6, 6)
-        dot.Position = UDim2.new(0, (i-1)*18, 0.5, -3)
+        dot.Size = UDim2.fromOffset(8, 8)
+        dot.Position = UDim2.new(0, (i - 1) * 24, 0.5, -4)
         dot.BackgroundColor3 = Theme.TextMuted
-        dot.BackgroundTransparency = 1
         dot.BorderSizePixel = 0
         dot.Parent = DotsFrame
-        local dc = Instance.new("UICorner"); dc.CornerRadius = UDim.new(1, 0); dc.Parent = dot
+
+        local dotCorner = Instance.new("UICorner")
+        dotCorner.CornerRadius = UDim.new(1, 0)
+        dotCorner.Parent = dot
+
         dots[i] = dot
     end
 
-    -- Key input
+    -- Key Input Frame
     local KeyFrame = Instance.new("Frame")
-    KeyFrame.Size = UDim2.new(1, -40, 0, 80)
-    KeyFrame.Position = UDim2.new(0, 20, 0, 165)
+    KeyFrame.Size = UDim2.new(1, -40, 0, 90)
+    KeyFrame.Position = UDim2.new(0, 20, 0, 175)
     KeyFrame.BackgroundColor3 = Theme.White
     KeyFrame.BackgroundTransparency = 1
     KeyFrame.Visible = false
     KeyFrame.Parent = Container
 
     local KeyPrompt = Instance.new("TextLabel")
-    KeyPrompt.Size = UDim2.new(1, 0, 0, 18)
+    KeyPrompt.Size = UDim2.new(1, 0, 0, 20)
     KeyPrompt.Position = UDim2.new(0, 0, 0, 0)
     KeyPrompt.BackgroundTransparency = 1
     KeyPrompt.Text = "Enter Access Key"
@@ -220,120 +393,126 @@ local function CreateLoader()
     KeyPrompt.Font = Enum.Font.GothamMedium
     KeyPrompt.TextSize = 12
     KeyPrompt.TextXAlignment = Enum.TextXAlignment.Center
-    KeyPrompt.TextTransparency = 1
     KeyPrompt.Parent = KeyFrame
 
     local InputBg = Instance.new("Frame")
-    InputBg.Size = UDim2.new(1, 0, 0, 32)
-    InputBg.Position = UDim2.new(0, 0, 0, 18)
+    InputBg.Size = UDim2.new(1, 0, 0, 36)
+    InputBg.Position = UDim2.new(0, 0, 0, 22)
     InputBg.BackgroundColor3 = Theme.WarmWhite
     InputBg.BorderSizePixel = 0
-    InputBg.BackgroundTransparency = 1
     InputBg.Parent = KeyFrame
-    local ibc = Instance.new("UICorner"); ibc.CornerRadius = UDim.new(0, 8); ibc.Parent = InputBg
+
+    local inputCorner = Instance.new("UICorner")
+    inputCorner.CornerRadius = UDim.new(0, 10)
+    inputCorner.Parent = InputBg
 
     local inputStroke = Instance.new("UIStroke")
     inputStroke.Color = Theme.Border
     inputStroke.Thickness = 1.5
-    inputStroke.Transparency = 1
     inputStroke.Parent = InputBg
 
     local KeyInput = Instance.new("TextBox")
-    KeyInput.Size = UDim2.new(1, -16, 1, 0)
-    KeyInput.Position = UDim2.fromOffset(8, 0)
+    KeyInput.Size = UDim2.new(1, -20, 1, 0)
+    KeyInput.Position = UDim2.fromOffset(10, 0)
     KeyInput.BackgroundTransparency = 1
     KeyInput.PlaceholderText = "Enter key..."
     KeyInput.Text = ""
     KeyInput.TextColor3 = Theme.TextPrimary
     KeyInput.PlaceholderColor3 = Theme.TextMuted
     KeyInput.Font = Enum.Font.Gotham
-    KeyInput.TextSize = 13
+    KeyInput.TextSize = 14
     KeyInput.TextXAlignment = Enum.TextXAlignment.Center
     KeyInput.ClearTextOnFocus = false
-    KeyInput.TextTransparency = 1
     KeyInput.Parent = InputBg
 
     local ValidateBtn = Instance.new("TextButton")
-    ValidateBtn.Size = UDim2.new(1, 0, 0, 30)
-    ValidateBtn.Position = UDim2.new(0, 0, 0, 56)
+    ValidateBtn.Size = UDim2.new(1, 0, 0, 34)
+    ValidateBtn.Position = UDim2.new(0, 0, 0, 65)
     ValidateBtn.BackgroundColor3 = Theme.Primary
     ValidateBtn.Text = "VALIDATE"
-    ValidateBtn.TextColor3 = Theme.White
+    ValidateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     ValidateBtn.Font = Enum.Font.GothamSemibold
-    ValidateBtn.TextSize = 12
+    ValidateBtn.TextSize = 13
     ValidateBtn.BorderSizePixel = 0
-    ValidateBtn.TextTransparency = 1
     ValidateBtn.Parent = KeyFrame
-    local vbc = Instance.new("UICorner"); vbc.CornerRadius = UDim.new(0, 8); vbc.Parent = ValidateBtn
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = ValidateBtn
 
     local FeedbackLabel = Instance.new("TextLabel")
-    FeedbackLabel.Size = UDim2.new(1, 0, 0, 16)
-    FeedbackLabel.Position = UDim2.new(0, 0, 0, -20)
+    FeedbackLabel.Size = UDim2.new(1, 0, 0, 18)
+    FeedbackLabel.Position = UDim2.new(0, 0, 0, -22)
     FeedbackLabel.BackgroundTransparency = 1
     FeedbackLabel.Text = ""
     FeedbackLabel.TextColor3 = Theme.Danger
     FeedbackLabel.Font = Enum.Font.Gotham
-    FeedbackLabel.TextSize = 10
+    FeedbackLabel.TextSize = 11
     FeedbackLabel.TextXAlignment = Enum.TextXAlignment.Center
     FeedbackLabel.Parent = ValidateBtn
 
-    -- Animación de entrada
+    -- Animación de entrada completa
     task.spawn(function()
-        task.wait(0.05)
+        task.wait(0.1)
         Container.Visible = true
         Container.Size = UDim2.fromOffset(0, 0)
-        smooth(Container, 0.4, { Size = UDim2.fromOffset(380, 280) }):Play()
+        tweenSpring(Container, 0.6, { Scale = 1, Size = UDim2.fromOffset(420, 320) }):Play()
 
+        task.wait(0.2)
+        tweenSpring(MainTitle, 0.7, { TextTransparency = 0, TextSize = 40 }):Play()
         task.wait(0.15)
-        smooth(MainTitle, 0.5, { TextTransparency = 0 }):Play()
-        task.wait(0.1)
-        smooth(SubTitle, 0.5, { TextTransparency = 0 }):Play()
+        tweenSpring(SubTitle, 0.6, { TextTransparency = 0 }):Play()
 
-        local loadTween = smooth(ProgressBar, 2.0, { Size = UDim2.new(1, 0, 1, 0) })
+        local loadTween = tweenSmooth(ProgressBar, 2.2, { Size = UDim2.new(1, 0, 1, 0) })
         loadTween:Play()
         task.wait(0.3)
-        smooth(ProgressText, 0.3, { TextTransparency = 0 }):Play()
+        tweenSmooth(ProgressText, 0.4, { TextTransparency = 0 }):Play()
 
         task.wait(2.0)
         loadTween:Cancel()
         ProgressBar.Size = UDim2.new(1, 0, 1, 0)
 
-        smooth(ProgressBg, 0.5, { BackgroundTransparency = 0.9, Position = UDim2.new(0, 40, 0, 70) }):Play()
-        smooth(ProgressBar, 0.3, { BackgroundTransparency = 1 }):Play()
-        smooth(ProgressText, 0.3, { TextTransparency = 1 }):Play()
-        smooth(topAccent, 0.3, { BackgroundTransparency = 1 }):Play()
-        smooth(MainTitle, 0.3, { TextTransparency = 0.4 }):Play()
-        smooth(SubTitle, 0.3, { TextTransparency = 0.4 }):Play()
+        -- Ocultar progreso con animación
+        tweenSmooth(ProgressBg, 0.5, { BackgroundTransparency = 0.9, Position = UDim2.new(0, 40, 0, 70) }):Play()
+        tweenSmooth(ProgressBar, 0.3, { BackgroundTransparency = 1 }):Play()
+        tweenSmooth(ProgressText, 0.3, { TextTransparency = 1 }):Play()
+        tweenSmooth(topAccent, 0.3, { BackgroundTransparency = 1 }):Play()
+        tweenSmooth(MainTitle, 0.3, { TextTransparency = 0.4 }):Play()
+        tweenSmooth(SubTitle, 0.3, { TextTransparency = 0.4 }):Play()
 
-        task.wait(0.15)
+        task.wait(0.2)
+
+        -- Animar dots
         for i, dot in ipairs(dots) do
             task.wait(0.1)
-            smooth(dot, 0.25, { BackgroundTransparency = 0, Size = UDim2.fromOffset(9, 9) }):Play()
+            tweenSpring(dot, 0.3, { BackgroundTransparency = 0.3, Size = UDim2.fromOffset(10, 10) }):Play()
+            task.wait(0.1)
+            tweenSpring(dot, 0.2, { BackgroundTransparency = 0, Size = UDim2.fromOffset(8, 8) }):Play()
         end
 
         task.wait(0.2)
         KeyFrame.Visible = true
-        smooth(KeyFrame, 0.5, { BackgroundTransparency = 0 }):Play()
+        tweenSmooth(KeyFrame, 0.5, { BackgroundTransparency = 0 }):Play()
 
         task.wait(0.1)
-        smooth(KeyPrompt, 0.3, { TextTransparency = 0 }):Play()
+        tweenSmooth(KeyPrompt, 0.4, { TextTransparency = 0 }):Play()
 
         task.wait(0.05)
-        smooth(InputBg, 0.3, { BackgroundTransparency = 0 }):Play()
+        tweenSmooth(InputBg, 0.4, { BackgroundTransparency = 0 }):Play()
 
         task.wait(0.05)
-        smooth(inputStroke, 0.3, { Transparency = 0 }):Play()
-        smooth(KeyInput, 0.3, { TextTransparency = 0 }):Play()
+        tweenSmooth(inputStroke, 0.4, { Transparency = 0 }):Play()
+        tweenSmooth(KeyInput, 0.4, { TextTransparency = 0 }):Play()
 
         task.wait(0.08)
-        elastic(ValidateBtn, 0.4, { TextTransparency = 0 }):Play()
+        tweenSpring(ValidateBtn, 0.5, { TextTransparency = 0 }):Play()
 
         -- Hover
         ValidateBtn.MouseEnter:Connect(function()
-            elastic(ValidateBtn, 0.2, { BackgroundColor3 = Theme.PrimaryDark, Size = UDim2.new(1, 6, 0, 34) }):Play()
+            tweenSmooth(ValidateBtn, 0.2, { BackgroundColor3 = Theme.PrimaryDark, Size = UDim2.new(1, 4, 0, 36) }):Play()
         end)
         ValidateBtn.MouseLeave:Connect(function()
-            smooth(ValidateBtn, 0.15, { BackgroundColor3 = Theme.Primary, Size = UDim2.new(1, 0, 0, 30) }):Play()
+            tweenSmooth(ValidateBtn, 0.15, { BackgroundColor3 = Theme.Primary, Size = UDim2.new(1, 0, 0, 34) }):Play()
         end)
     end)
 
@@ -359,7 +538,7 @@ local function BuildMainWindow()
 
     local Parent = getGuiParent()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XynorHub"
+    ScreenGui.Name = "XynorHub_v3"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.Parent = Parent
@@ -376,16 +555,23 @@ local function BuildMainWindow()
     glassC.CornerRadius = UDim.new(0, 20)
     glassC.Parent = GlassOverlay
 
+    local glassStroke = Instance.new("UIStroke")
+    glassStroke.Color = Theme.Border
+    glassStroke.Thickness = 1
+    glassStroke.Transparency = 0.5
+    glassStroke.Parent = GlassOverlay
+
     -- Main frame
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.fromOffset(0, 0)
+    MainFrame.Size = UDim2.fromOffset(180, 180)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    MainFrame.AnchorPoint = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.BackgroundColor3 = Theme.White
     MainFrame.BorderSizePixel = 0
     MainFrame.BackgroundTransparency = 1
     MainFrame.ClipsDescendants = true
     MainFrame.Parent = ScreenGui
+    MainFrame.ZIndex = 2
 
     local mfC = Instance.new("UICorner")
     mfC.CornerRadius = UDim.new(0, 20)
@@ -394,10 +580,12 @@ local function BuildMainWindow()
     -- Glass panel
     local GlassPanel = Instance.new("Frame")
     GlassPanel.Size = UDim2.new(1, 0, 1, 0)
+    GlassPanel.Position = UDim2.new(0, 0, 0, 0)
     GlassPanel.BackgroundColor3 = Theme.Panel
     GlassPanel.BackgroundTransparency = 0.92
     GlassPanel.BorderSizePixel = 0
     GlassPanel.Parent = MainFrame
+    GlassPanel.ZIndex = 0
 
     local gpC = Instance.new("UICorner")
     gpC.CornerRadius = UDim.new(0, 20)
@@ -425,10 +613,26 @@ local function BuildMainWindow()
     Topbar.BorderSizePixel = 0
     Topbar.BackgroundTransparency = 0.85
     Topbar.Parent = MainFrame
+    Topbar.ZIndex = 3
 
     local tbC = Instance.new("UICorner")
     tbC.CornerRadius = UDim.new(0, 20)
     tbC.Parent = Topbar
+
+    local tbBorder = Instance.new("Frame")
+    tbBorder.Size = UDim2.new(1, 0, 0, 1)
+    tbBorder.Position = UDim2.new(0, 0, 1, -1)
+    tbBorder.BackgroundColor3 = Theme.Border
+    tbBorder.BackgroundTransparency = 0.5
+    tbBorder.BorderSizePixel = 0
+    tbBorder.Parent = Topbar
+
+    local tbFix = Instance.new("Frame")
+    tbFix.Size = UDim2.new(1, 0, 0, 10)
+    tbFix.Position = UDim2.new(0, 0, 1, -10)
+    tbFix.BackgroundColor3 = Theme.Panel
+    tbFix.BorderSizePixel = 0
+    tbFix.Parent = Topbar
 
     local topAccent = Instance.new("Frame")
     topAccent.Size = UDim2.new(1, -40, 0, 2)
@@ -436,12 +640,27 @@ local function BuildMainWindow()
     topAccent.BackgroundColor3 = Theme.Primary
     topAccent.BorderSizePixel = 0
     topAccent.Parent = Topbar
-    local tac = Instance.new("UICorner"); tac.CornerRadius = UDim.new(1, 0); tac.Parent = topAccent
+
+    local taC = Instance.new("UICorner")
+    taC.CornerRadius = UDim.new(1, 0)
+    taC.Parent = topAccent
+
+    local accentGlow = Instance.new("Frame")
+    accentGlow.Size = UDim2.new(1, -40, 0, 4)
+    accentGlow.Position = UDim2.new(0, 20, 0, 2)
+    accentGlow.BackgroundColor3 = Theme.Primary
+    accentGlow.BorderSizePixel = 0
+    accentGlow.BackgroundTransparency = 0.6
+    accentGlow.Parent = Topbar
+
+    local agC = Instance.new("UICorner")
+    agC.CornerRadius = UDim.new(1, 0)
+    agC.Parent = accentGlow
 
     -- Title
     local TitleLbl = Instance.new("TextLabel")
     TitleLbl.Size = UDim2.new(0, 200, 0.5, 0)
-    TitleLbl.Position = UDim2.fromOffset(16, 0)
+    TitleLbl.Position = UDim2.fromOffset(14, 0)
     TitleLbl.BackgroundTransparency = 1
     TitleLbl.Text = "Xynor Hub"
     TitleLbl.TextColor3 = Theme.TextPrimary
@@ -452,16 +671,16 @@ local function BuildMainWindow()
 
     local CreditLbl = Instance.new("TextLabel")
     CreditLbl.Size = UDim2.new(0, 200, 0.5, 0)
-    CreditLbl.Position = UDim2.new(0, 16, 0.5, 0)
+    CreditLbl.Position = UDim2.new(0, 14, 0.5, 0)
     CreditLbl.BackgroundTransparency = 1
     CreditLbl.Text = "Premium Edition"
-    CreditLbl.TextColor3 = Theme.Primary
+    CreditLbl.TextColor3 = Theme.Accent
     CreditLbl.Font = Enum.Font.Gotham
-    CreditLbl.TextSize = isMobile and 10 or 11
+    CreditLbl.TextSize = isMobile and 11 or 12
     CreditLbl.TextXAlignment = Enum.TextXAlignment.Left
     CreditLbl.Parent = Topbar
 
-    -- Botones
+    -- Controls
     local MinBtn = Instance.new("TextButton")
     MinBtn.Size = UDim2.fromOffset(22, 22)
     MinBtn.Position = UDim2.new(1, -70, 0.5, -11)
@@ -472,8 +691,22 @@ local function BuildMainWindow()
     MinBtn.TextSize = 16
     MinBtn.BorderSizePixel = 0
     MinBtn.Parent = Topbar
-    local mc = Instance.new("UICorner"); mc.CornerRadius = UDim.new(1, 0); mc.Parent = MinBtn
-    local ms = Instance.new("UIStroke"); ms.Color = Theme.Border; ms.Thickness = 1; ms.Parent = MinBtn
+
+    local minC = Instance.new("UICorner")
+    minC.CornerRadius = UDim.new(1, 0)
+    minC.Parent = MinBtn
+
+    local minStroke = Instance.new("UIStroke")
+    minStroke.Color = Theme.Border
+    minStroke.Thickness = 1
+    minStroke.Parent = MinBtn
+
+    MinBtn.MouseEnter:Connect(function()
+        tweenSmooth(MinBtn, 0.1, { BackgroundColor3 = Color3.fromRGB(255, 170, 80) }):Play()
+    end)
+    MinBtn.MouseLeave:Connect(function()
+        tweenSmooth(MinBtn, 0.1, { BackgroundColor3 = Color3.fromRGB(255, 200, 100) }):Play()
+    end)
 
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.fromOffset(22, 22)
@@ -485,8 +718,22 @@ local function BuildMainWindow()
     CloseBtn.TextSize = 12
     CloseBtn.BorderSizePixel = 0
     CloseBtn.Parent = Topbar
-    local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(1, 0); cc.Parent = CloseBtn
-    local cs = Instance.new("UIStroke"); cs.Color = Theme.PrimaryDark; cs.Thickness = 1; cs.Parent = CloseBtn
+
+    local clsC = Instance.new("UICorner")
+    clsC.CornerRadius = UDim.new(1, 0)
+    clsC.Parent = CloseBtn
+
+    local clsStroke = Instance.new("UIStroke")
+    clsStroke.Color = Theme.PrimaryDark
+    clsStroke.Thickness = 1
+    clsStroke.Parent = CloseBtn
+
+    CloseBtn.MouseEnter:Connect(function()
+        tweenSmooth(CloseBtn, 0.1, { BackgroundColor3 = Theme.PrimaryDark }):Play()
+    end)
+    CloseBtn.MouseLeave:Connect(function()
+        tweenSmooth(CloseBtn, 0.1, { BackgroundColor3 = Theme.Primary }):Play()
+    end)
 
     -- Content
     local ContentFrame = Instance.new("Frame")
@@ -495,6 +742,7 @@ local function BuildMainWindow()
     ContentFrame.BackgroundTransparency = 1
     ContentFrame.Parent = MainFrame
 
+    -- Tabs (simplificado)
     local TabPanel = Instance.new("ScrollingFrame")
     TabPanel.Size = UDim2.new(0, 160, 1, 0)
     TabPanel.BackgroundColor3 = Color3.fromRGB(6, 2, 2)
@@ -533,23 +781,26 @@ local function BuildMainWindow()
 
     -- Animación de apertura
     task.spawn(function()
-        smooth(MainFrame, 0.35, { Size = UDim2.fromOffset(winW, winH), BackgroundTransparency = 0 }):Play()
+        tweenSpring(MainFrame, 0.35, { Size = UDim2.fromOffset(winW, winH), BackgroundTransparency = 0 }):Play()
         task.wait(0.08)
-        smooth(Topbar, 0.2, { BackgroundTransparency = 0 }):Play()
-        smooth(topAccent, 0.35, { Size = UDim2.new(1, 0, 0, 2) }):Play()
+        tweenExpo(Topbar, 0.2, { BackgroundTransparency = 0 }):Play()
+        task.delay(0.02, function()
+            tweenExpo(tbFix, 0.2, { BackgroundTransparency = 0 }):Play()
+        end)
+        tweenCirc(topAccent, 0.35, { Size = UDim2.new(1, 0, 0, 2) }):Play()
         task.wait(0.05)
-        smooth(TitleLbl, 0.18, { TextTransparency = 0 }):Play()
+        tweenSine(TitleLbl, 0.18, { TextTransparency = 0 }):Play()
         task.delay(0.03, function()
-            smooth(CreditLbl, 0.18, { TextTransparency = 0 }):Play()
+            tweenSine(CreditLbl, 0.18, { TextTransparency = 0 }):Play()
         end)
         task.delay(0.04)
-        smooth(MinBtn, 0.15, { BackgroundTransparency = 0 }):Play()
+        tweenBack(MinBtn, 0.15, { BackgroundTransparency = 0 }):Play()
         task.delay(0.02, function()
-            smooth(CloseBtn, 0.15, { BackgroundTransparency = 0 }):Play()
+            tweenBack(CloseBtn, 0.15, { BackgroundTransparency = 0 }):Play()
         end)
         task.delay(0.05)
-        smooth(TabPanel, 0.2, { BackgroundTransparency = 0 }):Play()
-        smooth(Separator, 0.2, { BackgroundTransparency = 0 }):Play()
+        tweenExpo(TabPanel, 0.2, { BackgroundTransparency = 0 }):Play()
+        tweenExpo(Separator, 0.2, { BackgroundTransparency = 0 }):Play()
     end)
 
     -- Drag
@@ -589,14 +840,21 @@ local function BuildMainWindow()
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Visible = false
     OpenBtn.Parent = ScreenGui
-    local oc = Instance.new("UICorner"); oc.CornerRadius = UDim.new(0, 8); oc.Parent = OpenBtn
-    local os = Instance.new("UIStroke"); os.Color = Theme.Primary; os.Thickness = 2; os.Parent = OpenBtn
+
+    local oc = Instance.new("UICorner")
+    oc.CornerRadius = UDim.new(0, 8)
+    oc.Parent = OpenBtn
+
+    local os = Instance.new("UIStroke")
+    os.Color = Theme.Primary
+    os.Thickness = 2
+    os.Parent = OpenBtn
 
     OpenBtn.MouseEnter:Connect(function()
-        smooth(OpenBtn, 0.15, { BackgroundColor3 = Theme.Primary }):Play()
+        tweenSmooth(OpenBtn, 0.15, { BackgroundColor3 = Theme.Primary }):Play()
     end)
     OpenBtn.MouseLeave:Connect(function()
-        smooth(OpenBtn, 0.15, { BackgroundColor3 = Theme.PrimaryDark }):Play()
+        tweenSmooth(OpenBtn, 0.15, { BackgroundColor3 = Theme.PrimaryDark }):Play()
     end)
 
     MinBtn.MouseButton1Click:Connect(function()
@@ -611,7 +869,7 @@ local function BuildMainWindow()
     end)
 
     CloseBtn.MouseButton1Click:Connect(function()
-        spring(MainFrame, 0.25, {Size = UDim2.fromOffset(winW, 0), BackgroundTransparency = 1}):Play()
+        tweenSpring(MainFrame, 0.25, { Size = UDim2.fromOffset(winW, 0), BackgroundTransparency = 1 }):Play()
         task.wait(0.3)
         ScreenGui:Destroy()
     end)
@@ -628,7 +886,7 @@ local function BuildMainWindow()
 end
 
 -- ═══════════════════════════════════════════════════════════════
--- LAUNCH ICON (ARRÄSTRABLE)
+-- LAUNCH ICON (ARRÄSTRABLE) - Con asset ID 91032354785729
 -- ═══════════════════════════════════════════════════════════════
 local function CreateLaunchIcon()
     local Parent = getGuiParent()
@@ -654,17 +912,16 @@ local function CreateLaunchIcon()
     -- Contenedor del icono (arrastrable)
     local IconContainer = Instance.new("Frame")
     IconContainer.Size = UDim2.fromOffset(120, 120)
-    -- Posición inicial centrada
-    local parentSize = Parent.AbsoluteSize
-    IconContainer.Position = UDim2.new(0, (parentSize.X - 120)//2, 0, (parentSize.Y - 120)//2)
-    IconContainer.AnchorPoint = Vector2.new(0, 0)
+    -- Posición inicial: centrada
+    IconContainer.Position = UDim2.new(0.5, -60, 0.5, -60)
+    IconContainer.AnchorPoint = Vector2.new(0.5, 0.5)
     IconContainer.BackgroundTransparency = 1
     IconContainer.Parent = ScreenGui
 
-    -- Botón icono
+    -- Botón icono principal
     local IconBtn = Instance.new("ImageButton")
     IconBtn.Size = UDim2.fromOffset(90, 90)
-    IconBtn.Position = UDim2.new(0, 15, 0, 15)  -- Centrado dentro del contenedor
+    IconBtn.Position = UDim2.new(0, 15, 0, 15)  -- Centrado en el contenedor
     IconBtn.AnchorPoint = Vector2.new(0, 0)
     IconBtn.BackgroundColor3 = Theme.White
     IconBtn.Image = "rbxassetid://91032354785729"
@@ -682,10 +939,10 @@ local function CreateLaunchIcon()
     iStroke.Transparency = 0.3
     iStroke.Parent = IconBtn
 
-    -- Anillo pulsante
+    -- Anillo pulsante exterior
     local pulseRing = Instance.new("Frame")
     pulseRing.Size = UDim2.fromOffset(110, 110)
-    pulseRing.Position = UDim2.new(0, 5, 0, 5)  -- Centrado
+    pulseRing.Position = UDim2.new(0, 5, 0, 5)
     pulseRing.AnchorPoint = Vector2.new(0, 0)
     pulseRing.BackgroundColor3 = Theme.Primary
     pulseRing.BackgroundTransparency = 0.9
@@ -694,30 +951,30 @@ local function CreateLaunchIcon()
     pulseRing.Parent = IconContainer
 
     local prc = Instance.new("UICorner")
-    prc.CornerRadius = UDim.new(0, 24)
-    prc.Parent = pulseRing
+    prC_CornerRadius = UDim.new(0, 24)
+    prC.Parent = pulseRing
 
-    -- Animación de pulso
+    -- Animación pulso
     task.spawn(function()
         while ScreenGui.Parent do
-            smooth(pulseRing, 1.5, { BackgroundTransparency = 0.7, Size = UDim2.fromOffset(115, 115) }):Play()
+            tweenSmooth(pulseRing, 1.5, { BackgroundTransparency = 0.7, Size = UDim2.fromOffset(115, 115) }):Play()
             task.wait(0.75)
             if ScreenGui.Parent then
-                smooth(pulseRing, 1.5, { BackgroundTransparency = 0.95, Size = UDim2.fromOffset(105, 105) }):Play()
+                tweenSmooth(pulseRing, 1.5, { BackgroundTransparency = 0.95, Size = UDim2.fromOffset(105, 105) }):Play()
                 task.wait(0.75)
             end
         end
     end)
 
-    -- Hover effect
+    -- Hover
     IconBtn.MouseEnter:Connect(function()
-        elastic(IconBtn, 0.2, { Size = UDim2.fromOffset(100, 100) }):Play()
+        tweenSpring(IconBtn, 0.2, { Size = UDim2.fromOffset(100, 100) }):Play()
     end)
     IconBtn.MouseLeave:Connect(function()
-        smooth(IconBtn, 0.2, { Size = UDim2.fromOffset(90, 90) }):Play()
+        tweenSmooth(IconBtn, 0.2, { Size = UDim2.fromOffset(90, 90) }):Play()
     end)
 
-    -- Lógica de arrastre y click
+    -- Lógica de drag y click
     local dragData = {
         dragging = false,
         startPos = nil,
@@ -726,10 +983,11 @@ local function CreateLaunchIcon()
     }
 
     local function openHub()
-        spring(IconBtn, 0.15, { Size = UDim2.fromOffset(0, 0) }):Play()
-        smooth(pulseRing, 0.2, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
-        smooth(overlay, 0.3, { BackgroundTransparency = 1 }):Play()
+        tweenSpring(IconBtn, 0.15, { Size = UDim2.fromOffset(0, 0) }):Play()
+        tweenSmooth(pulseRing, 0.2, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenSmooth(overlay, 0.3, { BackgroundTransparency = 1 }):Play()
         task.wait(0.3)
+        setBlur(0, 0.4)
         ScreenGui:Destroy()
         runMainHub()
     end
@@ -761,7 +1019,6 @@ local function CreateLaunchIcon()
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             if dragData.startPos then
                 if not dragData.dragging then
-                    -- Click sin arrastre → abrir UI
                     openHub()
                 end
                 dragData.dragging = false
@@ -778,8 +1035,8 @@ local function CreateLaunchIcon()
     pulseRing.Size = UDim2.fromOffset(0, 0)
 
     task.wait(0.1)
-    elastic(IconBtn, 0.6, { Size = UDim2.fromOffset(90, 90), ImageTransparency = 0 }):Play()
-    smooth(pulseRing, 0.5, { Size = UDim2.fromOffset(110, 110), BackgroundTransparency = 0.9 }):Play()
+    tweenSpring(IconBtn, 0.6, { Size = UDim2.fromOffset(90, 90), ImageTransparency = 0 }):Play()
+    tweenSmooth(pulseRing, 0.5, { Size = UDim2.fromOffset(110, 110), BackgroundTransparency = 0.9 }):Play()
 end
 
 -- ═══════════════════════════════════════════════════════════════
@@ -797,62 +1054,59 @@ end
 task.spawn(function()
     local loader = CreateLoader()
 
-    -- Animación de entrada del loader
-    task.wait(0.05)
-    loader.Container.Visible = true
-    smooth(loader.Container, 0.4, { Size = UDim2.fromOffset(380, 280) }):Play()
-
-    task.wait(0.15)
-    smooth(MainTitle, 0.5, { TextTransparency = 0 }):Play()
+    -- Animación de entrada
     task.wait(0.1)
-    smooth(SubTitle, 0.5, { TextTransparency = 0 }):Play()
+    loader.Container.Visible = true
+    tweenSpring(loader.Container, 0.6, { Scale = 1, Size = UDim2.fromOffset(420, 320) }):Play()
 
-    local loadTween = smooth(loader.ProgressBar, 2.0, { Size = UDim2.new(1, 0, 1, 0) })
+    task.wait(0.2)
+    tweenSpring(MainTitle, 0.7, { TextTransparency = 0, TextSize = 40 }):Play()
+    task.wait(0.15)
+    tweenSpring(SubTitle, 0.6, { TextTransparency = 0 }):Play()
+
+    local loadTween = tweenSmooth(loader.ProgressBar, 2.2, { Size = UDim2.new(1, 0, 1, 0) })
     loadTween:Play()
     task.wait(0.3)
-    smooth(loader.ProgressText, 0.3, { TextTransparency = 0 }):Play()
+    tweenSmooth(loader.ProgressText, 0.4, { TextTransparency = 0 }):Play()
 
     task.wait(2.0)
     loadTween:Cancel()
     loader.ProgressBar.Size = UDim2.new(1, 0, 1, 0)
 
-    smooth(loader.ProgressBg, 0.5, { BackgroundTransparency = 0.9, Position = UDim2.new(0, 40, 0, 70) }):Play()
-    smooth(loader.ProgressBar, 0.3, { BackgroundTransparency = 1 }):Play()
-    smooth(loader.ProgressText, 0.3, { TextTransparency = 1 }):Play()
-    smooth(topAccent, 0.3, { BackgroundTransparency = 1 }):Play()
-    smooth(MainTitle, 0.3, { TextTransparency = 0.4 }):Play()
-    smooth(SubTitle, 0.3, { TextTransparency = 0.4 }):Play()
+    -- Ocultar progreso
+    tweenSmooth(loader.ProgressBg, 0.5, { BackgroundTransparency = 0.9, Position = UDim2.new(0, 40, 0, 70) }):Play()
+    tweenSmooth(loader.ProgressBar, 0.3, { BackgroundTransparency = 1 }):Play()
+    tweenSmooth(loader.ProgressText, 0.3, { TextTransparency = 1 }):Play()
+    tweenSmooth(topAccent, 0.3, { BackgroundTransparency = 1 }):Play()
+    tweenSmooth(MainTitle, 0.3, { TextTransparency = 0.4 }):Play()
+    tweenSmooth(SubTitle, 0.3, { TextTransparency = 0.4 }):Play()
 
-    task.wait(0.15)
+    task.wait(0.2)
+
+    -- Dots
     for i, dot in ipairs(dots) do
         task.wait(0.1)
-        smooth(dot, 0.25, { BackgroundTransparency = 0, Size = UDim2.fromOffset(9, 9) }):Play()
+        tweenSpring(dot, 0.3, { BackgroundTransparency = 0.3, Size = UDim2.fromOffset(10, 10) }):Play()
+        task.wait(0.1)
+        tweenSpring(dot, 0.2, { BackgroundTransparency = 0, Size = UDim2.fromOffset(8, 8) }):Play()
     end
 
     task.wait(0.2)
     loader.KeyFrame.Visible = true
-    smooth(loader.KeyFrame, 0.5, { BackgroundTransparency = 0 }):Play()
+    tweenSmooth(loader.KeyFrame, 0.5, { BackgroundTransparency = 0 }):Play()
 
     task.wait(0.1)
-    smooth(loader.KeyPrompt, 0.3, { TextTransparency = 0 }):Play()
+    tweenSmooth(loader.KeyPrompt, 0.4, { TextTransparency = 0 }):Play()
 
     task.wait(0.05)
-    smooth(loader.InputBg, 0.3, { BackgroundTransparency = 0 }):Play()
+    tweenSmooth(loader.InputBg, 0.4, { BackgroundTransparency = 0 }):Play()
 
     task.wait(0.05)
-    smooth(inputStroke, 0.3, { Transparency = 0 }):Play()
-    smooth(loader.KeyInput, 0.3, { TextTransparency = 0 }):Play()
+    tweenSmooth(inputStroke, 0.4, { Transparency = 0 }):Play()
+    tweenSmooth(loader.KeyInput, 0.4, { TextTransparency = 0 }):Play()
 
     task.wait(0.08)
-    elastic(loader.SubmitBtn, 0.4, { TextTransparency = 0 }):Play()
-
-    -- Hover del botón
-    loader.SubmitBtn.MouseEnter:Connect(function()
-        elastic(loader.SubmitBtn, 0.2, { BackgroundColor3 = Theme.PrimaryDark, Size = UDim2.new(1, 6, 0, 34) }):Play()
-    end)
-    loader.SubmitBtn.MouseLeave:Connect(function()
-        smooth(loader.SubmitBtn, 0.15, { BackgroundColor3 = Theme.Primary, Size = UDim2.new(1, 0, 0, 30) }):Play()
-    end)
+    tweenSpring(loader.SubmitBtn, 0.5, { TextTransparency = 0 }):Play()
 
     -- Auto-validar key guardada
     task.wait(4.5)
@@ -863,11 +1117,14 @@ task.spawn(function()
             loader.Feedback.TextColor3 = Theme.Success
             task.wait(0.5)
 
-            smooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
-            smooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
+            -- Cerrar loader
+            tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+            tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
             task.wait(0.3)
             loader.Gui:Destroy()
             task.wait(0.3)
+
+            -- Mostrar icono arrastrable
             CreateLaunchIcon()
         end
     end
@@ -881,18 +1138,19 @@ task.spawn(function()
             loader.Feedback.TextColor3 = Theme.Success
             task.wait(0.5)
 
-            smooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
-            smooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
+            tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+            tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
             task.wait(0.3)
             loader.Gui:Destroy()
             task.wait(0.3)
+
             CreateLaunchIcon()
         else
             loader.Feedback.Text = "✗ Invalid key"
             loader.Feedback.TextColor3 = Theme.Danger
-            spring(loader.SubmitBtn, 0.15, { Position = UDim2.new(0, 6, 0.5, -17) }):Play()
+            tweenSpring(loader.SubmitBtn, 0.15, { Position = UDim2.new(0, 6, 0.5, -17) }):Play()
             task.wait(0.08)
-            spring(loader.SubmitBtn, 0.2, { Position = UDim2.new(0, 0, 0.5, -17) }):Play()
+            tweenSpring(loader.SubmitBtn, 0.2, { Position = UDim2.new(0, 0, 0.5, -17) }):Play()
         end
     end)
 
