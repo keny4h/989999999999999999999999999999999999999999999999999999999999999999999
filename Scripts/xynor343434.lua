@@ -1655,71 +1655,73 @@ local function BuildMainWindow()
     end
     
     local function playMainWindowAnimation()
-        MainFrame.Visible = true
-        GlassOverlay.Visible = true
-        
-        tweenElastic(MainFrame, 0.5, { 
-            Size = UDim2.fromOffset(winW, winH),
-            BackgroundTransparency = 0
-        }):Play()
-        
-        task.wait(0.1)
-        
-        tweenExpo(GlassOverlay, 0.4, { BackgroundTransparency = 0.7 }):Play()
-        
-        task.wait(0.15)
-        
-        tweenBack(Topbar, 0.25, { BackgroundTransparency = 0 }):Play()
-        
-        task.wait(0.08)
-        tweenElastic(TitleLbl, 0.3, { TextTransparency = 0, TextSize = 20 }):Play()
-        task.wait(0.05)
-        tweenSine(CreditLbl, 0.25, { TextTransparency = 0 }):Play()
-        
-        task.wait(0.1)
-        
-        tweenBack(Sidebar, 0.3, { BackgroundTransparency = 0 }):Play()
-        
-        local sideButtons = {}
-        for _, child in pairs(SidebarInner:GetChildren()) do
-            if child:IsA("TextButton") then
-                table.insert(sideButtons, child)
+        local ok, err = pcall(function()
+            MainFrame.Visible = true
+            GlassOverlay.Visible = true
+            
+            tweenElastic(MainFrame, 0.5, { 
+                Size = UDim2.fromOffset(winW, winH),
+                BackgroundTransparency = 0
+            }):Play()
+            
+            task.wait(0.1)
+            
+            tweenExpo(GlassOverlay, 0.4, { BackgroundTransparency = 0.7 }):Play()
+            
+            task.wait(0.15)
+            
+            tweenBack(Topbar, 0.25, { BackgroundTransparency = 0 }):Play()
+            
+            task.wait(0.08)
+            tweenElastic(TitleLbl, 0.3, { TextTransparency = 0, TextSize = 20 }):Play()
+            task.wait(0.05)
+            tweenSine(CreditLbl, 0.25, { TextTransparency = 0 }):Play()
+            
+            task.wait(0.1)
+            
+            tweenBack(Sidebar, 0.3, { BackgroundTransparency = 0 }):Play()
+            
+            local sideButtons = {}
+            for _, child in pairs(SidebarInner:GetChildren()) do
+                if child:IsA("TextButton") then
+                    table.insert(sideButtons, child)
+                end
             end
-        end
-        
-        local btnDelay = 0
-        for _, btn in ipairs(sideButtons) do
-            task.spawn(function()
-                task.wait(btnDelay)
-                tweenQuint(btn, 0.15, { BackgroundTransparency = 0 }):Play()
-            end)
-            btnDelay = btnDelay + 0.03
-        end
-        
-        task.wait(0.25)
-        
-        for _, p in ipairs(PageHolder:GetChildren()) do
-            if p:IsA("Frame") and p.Visible then
-                for _, child in pairs(p:GetChildren()) do
-                    if child:IsA("ScrollingFrame") then
-                        for _, inner in pairs(child:GetChildren()) do
-                            if inner:IsA("Frame") then
-                                local elements = inner:GetChildren()
-                                local elDelay = 0
-                                for _, el in ipairs(elements) do
-                                    if el:IsA("Frame") or el:IsA("TextLabel") or el:IsA("TextButton") then
-                                        el.BackgroundTransparency = 1
-                                        if el:IsA("TextLabel") or el:IsA("TextButton") then
-                                            el.TextTransparency = 1
-                                        end
-                                        task.spawn(function()
-                                            task.wait(elDelay)
-                                            tweenSine(el, 0.15, { BackgroundTransparency = 0 }):Play()
+            
+            local btnDelay = 0
+            for _, btn in ipairs(sideButtons) do
+                task.spawn(function()
+                    task.wait(btnDelay)
+                    tweenQuint(btn, 0.15, { BackgroundTransparency = 0 }):Play()
+                end)
+                btnDelay = btnDelay + 0.03
+            end
+            
+            task.wait(0.25)
+            
+            for _, p in ipairs(PageHolder:GetChildren()) do
+                if p:IsA("Frame") and p.Visible then
+                    for _, child in pairs(p:GetChildren()) do
+                        if child:IsA("ScrollingFrame") then
+                            for _, inner in pairs(child:GetChildren()) do
+                                if inner:IsA("Frame") then
+                                    local elements = inner:GetChildren()
+                                    local elDelay = 0
+                                    for _, el in ipairs(elements) do
+                                        if el:IsA("Frame") or el:IsA("TextLabel") or el:IsA("TextButton") then
+                                            el.BackgroundTransparency = 1
                                             if el:IsA("TextLabel") or el:IsA("TextButton") then
-                                                tweenSine(el, 0.15, { TextTransparency = 0 }):Play()
+                                                el.TextTransparency = 1
                                             end
-                                        end)
-                                        elDelay = elDelay + 0.03
+                                            task.spawn(function()
+                                                task.wait(elDelay)
+                                                tweenSine(el, 0.15, { BackgroundTransparency = 0 }):Play()
+                                                if el:IsA("TextLabel") or el:IsA("TextButton") then
+                                                    tweenSine(el, 0.15, { TextTransparency = 0 }):Play()
+                                                end
+                                            end)
+                                            elDelay = elDelay + 0.03
+                                        end
                                     end
                                 end
                             end
@@ -1727,6 +1729,9 @@ local function BuildMainWindow()
                     end
                 end
             end
+        end)
+        if not ok then
+            warn("[Xynor] Animation error: " .. tostring(err))
         end
     end
     
@@ -2000,8 +2005,20 @@ end
 -- MAIN HUB - ALL ORIGINAL FEATURES
 -- ═══════════════════════════════════════════════════════════════
 function runMainHub()
+    print("[Xynor] Starting main hub...")
+    
     -- Create UI
-    local WindowAPI, WindowFrame = BuildMainWindow()
+    local ok, result = pcall(function()
+        return BuildMainWindow()
+    end)
+    
+    if not ok then
+        warn("[Xynor] Error building window: " .. tostring(result))
+        return
+    end
+    
+    local WindowAPI, WindowFrame = result
+    print("[Xynor] Window built successfully, WindowAPI:", WindowAPI, "Frame:", WindowFrame)
     
     -- Build sections
     local InfoSec = WindowAPI:Section({ Title = "Information" })
@@ -2883,10 +2900,16 @@ end
 local loader = CreateLoader()
 
 local function doValidateKey()
-    if not loader.Gui or not loader.Gui.Parent then return end
+    print("[Xynor] doValidateKey called")
+    if not loader.Gui or not loader.Gui.Parent then 
+        print("[Xynor] Loader GUI not found")
+        return 
+    end
     
     local key = loader.KeyInput.Text
+    print("[Xynor] Key entered:", key)
     if KeySystem:Check(key) then
+        print("[Xynor] Key validated successfully!")
         KeySystem:Save(key)
         loader.Feedback.Text = "✓ Access granted"
         loader.Feedback.TextColor3 = Theme.Success
@@ -2909,8 +2932,10 @@ local function doValidateKey()
         
         task.wait(0.15)
         
+        print("[Xynor] Calling runMainHub()...")
         runMainHub()
     else
+        print("[Xynor] Invalid key!")
         loader.Feedback.Text = "✗ Invalid key"
         loader.Feedback.TextColor3 = Theme.Danger
         tweenElastic(loader.SubmitBtn, 0.15, { Size = UDim2.new(1, 8, 0, 38) }):Play()
@@ -2920,11 +2945,18 @@ local function doValidateKey()
 end
 
 task.spawn(function()
+    print("[Xynor] Auto-validate task started")
     task.wait(4.5)
-    if not loader.Gui or not loader.Gui.Parent then return end
+    print("[Xynor] Auto-validate checking...")
+    if not loader.Gui or not loader.Gui.Parent then 
+        print("[Xynor] Loader GUI not found in auto-validate")
+        return 
+    end
     
     local savedKey = KeySystem:GetSaved()
+    print("[Xynor] Saved key:", savedKey)
     if savedKey and KeySystem:Check(savedKey) then
+        print("[Xynor] Auto-validate: key verified!")
         loader.Feedback.Text = "✓ Key verified"
         loader.Feedback.TextColor3 = Theme.Success
         task.wait(0.2)
@@ -2943,7 +2975,10 @@ task.spawn(function()
         
         task.wait(0.15)
         
+        print("[Xynor] Auto-validate calling runMainHub()...")
         runMainHub()
+    else
+        print("[Xynor] Auto-validate: no valid saved key")
     end
 end)
 
@@ -2955,4 +2990,4 @@ loader.KeyInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
-print("Xynor Hub v3.0 initialized successfully")
+print("✨ Xynor Hub v3.0 initialized successfully")
