@@ -44,6 +44,14 @@ local function tweenLinear(obj, dur, props)
     return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), props)
 end
 
+local function tweenBack(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Back, Enum.EasingDirection.Out), props)
+end
+
+local function tweenQuint(obj, dur, props)
+    return TweenService:Create(obj, TweenInfo.new(dur, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), props)
+end
+
 -- ═══════════════════════════════════════════════════════════════
 -- BLUR EFFECT CONTROLLER (Premium visual effects)
 -- ═══════════════════════════════════════════════════════════════
@@ -2947,4 +2955,4 @@ loader.KeyInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
-print(" Xynor Hub v3.0 initialized successfully")
+print("Xynor Hub v3.0 initialized successfully")
