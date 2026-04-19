@@ -148,7 +148,7 @@ local function CreateLoader()
     -- Main container (clean card design)
     local Container = Instance.new("Frame")
     Container.Size = UDim2.fromOffset(420, 320)
-    Container.Position = UDim2.new(0.5, -210, 0.5, -160)
+    Container.Position = UDim2.new(0.5, 0, 0.5, 0)
     Container.BackgroundColor3 = Theme.White
     Container.BorderSizePixel = 0
     Container.ClipsDescendants = true
@@ -508,6 +508,7 @@ local function BuildMainWindow()
     MainFrame.BorderSizePixel = 0
     MainFrame.BackgroundTransparency = 1
     MainFrame.ClipsDescendants = true
+    MainFrame.Visible = false
     MainFrame.Parent = ScreenGui
     MainFrame.ZIndex = 2
     
@@ -697,31 +698,6 @@ local function BuildMainWindow()
             BackgroundColor3 = Theme.Accent,
             Size = UDim2.fromOffset(28, 28)
         }):Play()
-    end)
-    MinimizeBtn.MouseLeave:Connect(function()
-        tweenSmooth(MinimizeBtn, 0.2, { BackgroundColor3 = Theme.LightGray }):Play()
-    end)
-    
-    local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.fromOffset(28, 28)
-    CloseBtn.Position = UDim2.new(1, -36, 0.5, -14)
-    CloseBtn.BackgroundColor3 = Theme.Accent
-    CloseBtn.Text = "✕"
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseBtn.Font = Enum.Font.GothamBold
-    CloseBtn.TextSize = 14
-    CloseBtn.BorderSizePixel = 0
-    CloseBtn.Parent = Topbar
-    
-    local cloC = Instance.new("UICorner")
-    cloC.CornerRadius = UDim.new(1, 0)
-    cloC.Parent = CloseBtn
-    
-    CloseBtn.MouseEnter:Connect(function()
-        tweenSmooth(CloseBtn, 0.2, { BackgroundColor3 = Theme.AccentDark }):Play()
-    end)
-    CloseBtn.MouseLeave:Connect(function()
-        tweenSmooth(CloseBtn, 0.2, { BackgroundColor3 = Theme.Accent }):Play()
     end)
     
     -- Content
@@ -1533,6 +1509,8 @@ local function BuildMainWindow()
     
     -- Window open animation
     task.spawn(function()
+        task.wait(0.05)
+        MainFrame.Visible = true
         tweenSpring(MainFrame, 0.6, { 
             Size = UDim2.fromOffset(winW, winH),
             BackgroundTransparency = 0
