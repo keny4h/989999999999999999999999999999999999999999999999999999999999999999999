@@ -983,7 +983,7 @@ local function BuildMainWindow()
             secTitle.AutomaticSize = Enum.AutomaticSize.X
             secTitle.Position = UDim2.fromOffset(8, 0)
             secTitle.BackgroundColor3 = Theme.Primary
-            secTitle.BackgroundTransparency = 0.88
+            secTitle.BackgroundTransparency = 1
             secTitle.BorderSizePixel = 0
             secTitle.Text = "  " .. (opts.Title or "") .. "  "
             secTitle.TextColor3 = Theme.White
@@ -1500,27 +1500,84 @@ local function BuildMainWindow()
         return tab
     end
     
-    -- Window open animation
-    task.spawn(function()
-        task.wait(0.05)
+    local function playMainWindowAnimation()
         MainFrame.Visible = true
-        tweenSpring(MainFrame, 0.6, { 
-            Size = UDim2.fromOffset(winW, winH),
-            BackgroundTransparency = 0
-        }):Play()
+        GlassOverlay.Visible = true
+        
+        local mainScale = Instance.new("UIScale")
+        mainScale.Scale = 0.8
+        mainScale.Parent = MainFrame
+        
+        local glassScale = Instance.new("UIScale")
+        glassScale.Scale = 0.85
+        glassScale.Parent = GlassOverlay
+        
+        tweenSmooth(GlassOverlay, 0.5, { BackgroundTransparency = 0.7 }):Play()
+        
+        task.wait(0.05)
+        
+        tweenSpring(mainScale, 0.7, { Scale = 1 }):Play()
+        tweenSpring(glassScale, 0.7, { Scale = 1 }):Play()
+        
         task.wait(0.15)
+        
         tweenSmooth(Topbar, 0.4, { BackgroundTransparency = 0 }):Play()
         tweenSmooth(TitleLbl, 0.4, { TextTransparency = 0 }):Play()
         tweenSmooth(CreditLbl, 0.4, { TextTransparency = 0 }):Play()
-        task.wait(0.1)
+        
+        task.wait(0.08)
+        
         tweenSmooth(Sidebar, 0.35, { BackgroundTransparency = 0 }):Play()
+        
+        task.wait(0.1)
+        
+        local sideButtons = {}
         for _, child in pairs(SidebarInner:GetChildren()) do
             if child:IsA("TextButton") then
-                task.wait(0.03)
-                tweenSmooth(child, 0.3, { BackgroundTransparency = 0 }):Play()
+                table.insert(sideButtons, child)
             end
         end
-    end)
+        
+        for i, btn in ipairs(sideButtons) do
+            task.spawn(function()
+                task.wait(i * 0.05)
+                tweenSmooth(btn, 0.3, { BackgroundTransparency = 0 }):Play()
+            end)
+        end
+        
+        task.wait(0.3)
+        
+        for _, p in ipairs(PageHolder:GetChildren()) do
+            if p:IsA("Frame") and p.Visible then
+                for _, child in pairs(p:GetChildren()) do
+                    if child:IsA("ScrollingFrame") then
+                        for _, inner in pairs(child:GetChildren()) do
+                            if inner:IsA("Frame") then
+                                local elements = inner:GetChildren()
+                                for j, el in ipairs(elements) do
+                                    if el:IsA("Frame") or el:IsA("TextLabel") or el:IsA("TextButton") then
+                                        el.BackgroundTransparency = 1
+                                        if el:IsA("TextLabel") or el:IsA("TextButton") then
+                                            el.TextTransparency = 1
+                                        end
+                                        task.spawn(function()
+                                            task.wait(j * 0.05)
+                                            tweenSmooth(el, 0.25, { BackgroundTransparency = 0 }):Play()
+                                            if el:IsA("TextLabel") or el:IsA("TextButton") then
+                                                tweenSmooth(el, 0.25, { TextTransparency = 0 }):Play()
+                                            end
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    task.spawn(playMainWindowAnimation)
     
     -- Dragging
     local dragging, dragStart, startPos = false, nil, nil
