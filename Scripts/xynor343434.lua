@@ -1656,9 +1656,6 @@ local function BuildMainWindow()
     
     local function playMainWindowAnimation()
         local ok, err = pcall(function()
-            MainFrame.Visible = true
-            GlassOverlay.Visible = true
-            
             tweenElastic(MainFrame, 0.5, { 
                 Size = UDim2.fromOffset(winW, winH),
                 BackgroundTransparency = 0
@@ -1735,7 +1732,7 @@ local function BuildMainWindow()
         end
     end
     
-    task.spawn(playMainWindowAnimation)
+    -- NO ejecutar animación automáticamente - solo cuando se llame desde runMainHub
     
     -- Dragging
     local dragging, dragStart, startPos = false, nil, nil
@@ -1779,7 +1776,7 @@ local function BuildMainWindow()
         ScreenGui:Destroy()
     end)
     
-    return WindowAPI, MainFrame
+    return WindowAPI, MainFrame, GlassOverlay, Topbar, TitleLbl, CreditLbl, Sidebar
 end
 
 -- ═══════════════════════════════════════════════════════════════
@@ -2006,17 +2003,24 @@ end
 -- ═══════════════════════════════════════════════════════════════
 function runMainHub()
     -- Create UI
-    local WindowAPI, WindowFrame = BuildMainWindow()
+    local WindowAPI, WindowFrame, GlassOverlay, Topbar, TitleLbl, CreditLbl, Sidebar = BuildMainWindow()
     
     if not WindowFrame then
         return
     end
     
-    -- Make sure window is visible immediately
-    task.wait(0.1)
+    -- Make window visible immediately with proper initial state
     WindowFrame.Visible = true
     WindowFrame.BackgroundTransparency = 0
     WindowFrame.Size = UDim2.fromOffset(620, 520)
+    GlassOverlay.Visible = true
+    GlassOverlay.BackgroundTransparency = 0.85
+    
+    -- Show Topbar, TitleLbl, CreditLbl, Sidebar immediately
+    Topbar.BackgroundTransparency = 0
+    TitleLbl.TextTransparency = 0
+    CreditLbl.TextTransparency = 0
+    Sidebar.BackgroundTransparency = 0
     
     -- Build sections
     local InfoSec = WindowAPI:Section({ Title = "Information" })
@@ -2906,14 +2910,27 @@ local function doValidateKey()
         loader.Feedback.Text = "✓ Access granted"
         loader.Feedback.TextColor3 = Theme.Success
         
-        task.wait(0.3)
+        -- Animated transition out
+        task.wait(0.2)
         
+        -- Animate loader out
+        tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
+        
+        task.wait(0.4)
+        
+        -- Remove blur
+        setBlur(0, 0.5)
+        
+        -- Destroy loader
         if loader.Gui and loader.Gui.Parent then
             loader.Gui:Destroy()
         end
         
-        task.wait(0.1)
+        -- Small delay before showing main UI
+        task.wait(0.2)
         
+        -- Show main hub
         runMainHub()
     else
         loader.Feedback.Text = "✗ Invalid key"
@@ -2929,14 +2946,28 @@ task.spawn(function()
     if savedKey and KeySystem:Check(savedKey) then
         loader.Feedback.Text = "✓ Key verified"
         loader.Feedback.TextColor3 = Theme.Success
-        task.wait(0.3)
         
+        -- Animated transition out
+        task.wait(0.2)
+        
+        -- Animate loader out
+        tweenSmooth(loader.Container, 0.4, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
+        tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
+        
+        task.wait(0.4)
+        
+        -- Remove blur
+        setBlur(0, 0.5)
+        
+        -- Destroy loader
         if loader.Gui and loader.Gui.Parent then
             loader.Gui:Destroy()
         end
         
-        task.wait(0.1)
+        -- Small delay before showing main UI
+        task.wait(0.2)
         
+        -- Show main hub
         runMainHub()
     end
 end)
@@ -2949,4 +2980,4 @@ loader.KeyInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
-print("Xynor Hub v3.0 initialized successfully")
+print("✨ Xynor Hub v3.0 initialized successfully")
