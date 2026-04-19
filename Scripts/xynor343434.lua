@@ -2005,20 +2005,18 @@ end
 -- MAIN HUB - ALL ORIGINAL FEATURES
 -- ═══════════════════════════════════════════════════════════════
 function runMainHub()
-    print("[Xynor] Starting main hub...")
-    
     -- Create UI
-    local ok, result = pcall(function()
-        return BuildMainWindow()
-    end)
+    local WindowAPI, WindowFrame = BuildMainWindow()
     
-    if not ok then
-        warn("[Xynor] Error building window: " .. tostring(result))
+    if not WindowFrame then
         return
     end
     
-    local WindowAPI, WindowFrame = result
-    print("[Xynor] Window built successfully, WindowAPI:", WindowAPI, "Frame:", WindowFrame)
+    -- Make sure window is visible immediately
+    task.wait(0.1)
+    WindowFrame.Visible = true
+    WindowFrame.BackgroundTransparency = 0
+    WindowFrame.Size = UDim2.fromOffset(620, 520)
     
     -- Build sections
     local InfoSec = WindowAPI:Section({ Title = "Information" })
@@ -2900,85 +2898,46 @@ end
 local loader = CreateLoader()
 
 local function doValidateKey()
-    print("[Xynor] doValidateKey called")
-    if not loader.Gui or not loader.Gui.Parent then 
-        print("[Xynor] Loader GUI not found")
-        return 
-    end
+    if not loader.Gui or not loader.Gui.Parent then return end
     
     local key = loader.KeyInput.Text
-    print("[Xynor] Key entered:", key)
     if KeySystem:Check(key) then
-        print("[Xynor] Key validated successfully!")
         KeySystem:Save(key)
         loader.Feedback.Text = "✓ Access granted"
         loader.Feedback.TextColor3 = Theme.Success
         
-        task.wait(0.2)
-        
-        tweenElastic(loader.Container, 0.5, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
-        tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
-        
-        tweenSmooth(loader.Container, 0.4, { Rotation = 5 }):Play()
-        
-        task.wait(0.4)
-        
-        setBlur(0, 0.4)
+        task.wait(0.3)
         
         if loader.Gui and loader.Gui.Parent then
-            if loader.ParticleConn then loader.ParticleConn:Disconnect() end
             loader.Gui:Destroy()
         end
         
-        task.wait(0.15)
+        task.wait(0.1)
         
-        print("[Xynor] Calling runMainHub()...")
         runMainHub()
     else
-        print("[Xynor] Invalid key!")
         loader.Feedback.Text = "✗ Invalid key"
         loader.Feedback.TextColor3 = Theme.Danger
-        tweenElastic(loader.SubmitBtn, 0.15, { Size = UDim2.new(1, 8, 0, 38) }):Play()
-        task.wait(0.1)
-        tweenSmooth(loader.SubmitBtn, 0.2, { Size = UDim2.new(1, 0, 0, 34) }):Play()
     end
 end
 
 task.spawn(function()
-    print("[Xynor] Auto-validate task started")
     task.wait(4.5)
-    print("[Xynor] Auto-validate checking...")
-    if not loader.Gui or not loader.Gui.Parent then 
-        print("[Xynor] Loader GUI not found in auto-validate")
-        return 
-    end
+    if not loader.Gui or not loader.Gui.Parent then return end
     
     local savedKey = KeySystem:GetSaved()
-    print("[Xynor] Saved key:", savedKey)
     if savedKey and KeySystem:Check(savedKey) then
-        print("[Xynor] Auto-validate: key verified!")
         loader.Feedback.Text = "✓ Key verified"
         loader.Feedback.TextColor3 = Theme.Success
-        task.wait(0.2)
-        
-        tweenElastic(loader.Container, 0.5, { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play()
-        tweenSmooth(loader.KeyFrame, 0.3, { BackgroundTransparency = 1 }):Play()
-        
-        task.wait(0.4)
-        
-        setBlur(0, 0.4)
+        task.wait(0.3)
         
         if loader.Gui and loader.Gui.Parent then
-            if loader.ParticleConn then loader.ParticleConn:Disconnect() end
             loader.Gui:Destroy()
         end
         
-        task.wait(0.15)
+        task.wait(0.1)
         
-        print("[Xynor] Auto-validate calling runMainHub()...")
         runMainHub()
-    else
-        print("[Xynor] Auto-validate: no valid saved key")
     end
 end)
 
@@ -2990,4 +2949,4 @@ loader.KeyInput.FocusLost:Connect(function(enterPressed)
     end
 end)
 
-print("✨ Xynor Hub v3.0 initialized successfully")
+print("Xynor Hub v3.0 initialized successfully")
