@@ -1657,7 +1657,17 @@ function XinorUI:MakeDraggable(frame)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
-    end)
-end
+end)
+ end
+
+-- AUTO-START para testing (borra esta secci�n para uso normal)
+task.spawn(function()
+    task.wait(0.3)
+    local win = XinorUI:CreateWindow({Title = "XINOR HUB"})
+    local main = win:Section({}):Tab({Title = "Main"})
+    main:Paragraph({Title = "Welcome!", Desc = "Xinor UI v3.0 loaded successfully"})
+    main:Button({Title = "Test Button", Callback = function() end})
+    win:CreateInfoTab()
+end)
 
 return XinorUI
