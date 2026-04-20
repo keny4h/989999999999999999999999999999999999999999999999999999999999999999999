@@ -1660,13 +1660,48 @@ function XinorUI:MakeDraggable(frame)
 end)
  end
 
--- AUTO-START para testing (borra esta secci�n para uso normal)
+-- AUTO-START para demo completo
 task.spawn(function()
-    task.wait(0.3)
+    task.wait(0.5)
     local win = XinorUI:CreateWindow({Title = "XINOR HUB"})
-    local main = win:Section({}):Tab({Title = "Main"})
-    main:Paragraph({Title = "Welcome!", Desc = "Xinor UI v3.0 loaded successfully"})
-    main:Button({Title = "Test Button", Callback = function() end})
+    
+    local home = win:Section({}):Tab({Title = "Home", Icon = "rbxassetid://91032354785729"})
+    
+    home:Paragraph({Title = "XinorUI v3.0", Desc = "Full demo de todos los componentes"})
+    
+    home:Section({Title = "BOTONES"})
+    home:Button({Title = "Discord", Callback = function() setclipboard("https://discord.gg/aNkfDP2V") end})
+    home:Button({Title = "Test 2", Callback = function() end})
+    home:Button({Title = "Notificacion", Callback = function() XinorUI:Notify({Title = "Hola!"}) end})
+    
+    home:Section({Title = "TOGGLES"})
+    home:Toggle({Title = "Feature 1", Default = true, Callback = function(v) end})
+    home:Toggle({Title = "Feature 2", Default = false, Callback = function(v) end})
+    home:Toggle({Title = "Feature 3", Default = false, Callback = function(v) end})
+    
+    home:Section({Title = "SLIDERS"})
+    home:Slider({Title = "Volumen", Min = 0, Max = 100, Default = 50, Callback = function(v) end})
+    home:Slider({Title = "Speed", Min = 1, Max = 10, Default = 5, Callback = function(v) end})
+    
+    home:Section({Title = "INPUT"})
+    home:Input({Title = "Nombre", Placeholder = "Escribe...", Callback = function(v) end})
+    home:Input({Title = "Codigo", Value = "FREE", Callback = function(v) end})
+    
+    home:Section({Title = "KEYBINDS"})
+    home:Keybind({Title = "Toggle GUI", Default = Enum.KeyCode.LeftControl, Callback = function() end})
+    
+    home:Section({Title = "LABELS"})
+    home:Label({Text = "Exito", Color = PALETTE.SUCCESS})
+    home:Label({Text = "Advertencia", Color = PALETTE.WARNING})
+    home:Label({Text = "Error", Color = PALETTE.ERROR})
+    home:Label({Text = "Info", Color = PALETTE.INFO})
+    
+    local features = win:Section({}):Tab({Title = "Features", Icon = "rbxassetid::7733658504"})
+    features:Paragraph({Title = "Features", Desc = "Configuracion"})
+    features:Toggle({Title = "Dark Mode", Default = true})
+    features:Toggle({Title = "Animations", Default = true})
+    features:Slider({Title = "Opacity", Min = 0, Max = 100, Default = 100})
+    
     win:CreateInfoTab()
 end)
 
