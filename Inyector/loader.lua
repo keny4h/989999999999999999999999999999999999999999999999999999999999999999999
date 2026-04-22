@@ -141,16 +141,17 @@ addGradient(spinner, {
 
 -- Animation
 task.spawn(function()
+    local messages = {
+        "Initializing Advanced System...",
+        "Loading Core Modules...",
+        "Configuring UI Components...",
+        "Preparing FFlags Engine...",
+        "Almost Ready...",
+    }
     for i = 1, 100 do
         TweenService:Create(loaderBar, TweenInfo.new(0.025), { Size = UDim2.new(i/100, 0, 1, 0) }):Play()
-        local messages = {
-            "Initializing Advanced System...",
-            "Loading Core Modules...",
-            "Configuring UI Components...",
-            "Preparing FFlags Engine...",
-            "Almost Ready...",
-        }
-        loaderText.Text = messages[math.floor(i/20) + 1] .. string.format(" %d%%", i)
+        local msgIndex = math.min(math.floor(i/20) + 1, #messages)
+        loaderText.Text = messages[msgIndex] .. string.format(" %d%%", i)
         task.wait(0.025)
     end
 
