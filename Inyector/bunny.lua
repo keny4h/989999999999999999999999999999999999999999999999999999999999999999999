@@ -310,6 +310,7 @@ local win = create("Frame", {
     Position = UDim2.new(0.5, -170, 0.5, -210),
     BackgroundColor3 = THEME.BG,
     Visible = false,
+    ZIndex = 40,
 })
 addCorner(win, 15)
 addGradient(win, {
