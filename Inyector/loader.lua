@@ -171,10 +171,24 @@ task.spawn(function()
 
     task.delay(0.9, function()
         loaderGui:Destroy()
-        -- Load bunny.lua from GitHub
-        pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/keny4h/989999999999999999999999999999999999999999999999999999999999999999999/refs/heads/main/Inyector/bunny.lua"))()
-        end)
+        -- Load bunny.lua locally
+        local ok, bunnySrc = pcall(function() return readfile("bunny.lua") end)
+        if ok and type(bunnySrc) == "string" and #bunnySrc > 0 then
+            pcall(function() loadstring(bunnySrc)() end)
+        else
+            -- Fallback: try to create a simple notification if load fails
+            local notif = create("TextLabel", {
+                Parent = playerGui,
+                Size = UDim2.fromOffset(300, 50),
+                Position = UDim2.new(0.5, -150, 0.5, -25),
+                BackgroundColor3 = THEME.ERROR,
+                Text = "Error: Could not load UI",
+                Font = Enum.Font.GothamBold,
+                TextSize = 16,
+                TextColor3 = THEME.WHITE,
+            })
+            addCorner(notif, 8)
+        end
     end)
 end)
 
