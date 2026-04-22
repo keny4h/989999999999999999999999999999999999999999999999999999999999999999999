@@ -171,11 +171,10 @@ task.spawn(function()
 
     task.delay(0.9, function()
         loaderGui:Destroy()
-        -- Load bunny.lua
-        local ok, bunnySrc = pcall(function() return readfile("bunny.lua") end)
-        if ok and type(bunnySrc) == "string" and #bunnySrc > 0 then
-            pcall(function() loadstring(bunnySrc)() end)
-        end
+        -- Load bunny.lua from GitHub
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/keny4h/989999999999999999999999999999999999999999999999999999999999999999999/refs/heads/main/Inyector/bunny.lua"))()
+        end)
     end)
 end)
 
