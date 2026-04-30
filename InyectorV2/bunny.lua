@@ -34,7 +34,6 @@ local PASTEL = {
 local ACCENT = Color3.fromRGB(142, 100, 220)
 local GLOW   = Color3.fromRGB(190, 150, 245)
 
--- Retrocompatibilidad
 local C_HOT = ACCENT
 local C_DARK = PASTEL.DARK
 local C_DIM = PASTEL.CARD
@@ -299,7 +298,7 @@ local cancelBtn = mkBtn("Cancelar", 0.5, -2, -20, false)
 local saveBtn = mkBtn("Sanitizar", 0, 2, 4, false)
 local injectBtn = mkBtn("INJECT", 0.5, -2, 4, true)
 
--- === INYECCION ===
+-- === INYECCION SEGURA ===
 local hasSFF = type(setfflag) == "function"
 local hasSFI = type(setfint) == "function"
 local hasSFS = type(setfstring) == "function"
@@ -320,30 +319,46 @@ local function fkind(k)
     return "str"
 end
 
--- DELAY ANTI-CRASH (0.15s)
-local INJECT_DELAY = 0.15
+-- DELAY ANTI-CRASH (0.2s = muy seguro)
+local INJECT_DELAY = 0.2
 
 local function trySet(key, val)
     local vstr, kind = tostring(val), fkind(key)
     local name = stripPfx(key)
-    local function attempt(fn, ...)
-        return fn and type(fn) == "function" and pcall(fn, ...)
+    -- Bypass total: intenta todas las combinaciones posibles
+    local attempts = {
+        hasSFF and function() return pcall(setfflag, key, vstr) end,
+        hasSFF and function() return pcall(setfflag, name, vstr) end,
+        kind == "bool" and hasSFF and function() 
+            local b = vstr:lower()
+            if b == "true" or b == "1" or b == "yes" then return pcall(setfflag, key, "True")
+            elseif b == "false" or b == "0" or b == "no" then return pcall(setfflag, key, "False") end
+            return false
+        end,
+        kind == "int" and hasSFI and function() 
+            local n = tonumber(vstr)
+            if n then return pcall(setfint, key, math.floor(n)) end
+            return false
+        end,
+        kind == "int" and hasSFI and function() 
+            local n = tonumber(vstr)
+            if n then return pcall(setfint, name, math.floor(n)) end
+            return false
+        end,
+        kind == "int" and hasSFF and function() 
+            local n = tonumber(vstr)
+            if n then return pcall(setfflag, key, tostring(math.floor(n))) end
+            return false
+        end,
+        hasSFS and function() return pcall(setfstring, key, vstr) end,
+        hasSFS and function() return pcall(setfstring, name, vstr) end,
+    }
+    for _, fn in ipairs(attempts) do
+        if fn then
+            local ok, res = fn()
+            if ok and res then return true end
+        end
     end
-    if kind == "int" then
-        local n = tonumber(vstr) or 999999999
-        if hasSFI and attempt(setfint, key, n) then return true end
-        if hasSFI and attempt(setfint, name, n) then return true end
-        if hasSFF and attempt(setfflag, key, tostring(n)) then return true end
-        if hasSFF and attempt(setfflag, name, tostring(n)) then return true end
-    end
-    local bl = vstr:lower()
-    if bl == "true" or bl == "1" or bl == "yes" then
-        if hasSFF and (attempt(setfflag, key, "True") or attempt(setfflag, name, "True")) then return true end
-    elseif bl == "false" or bl == "0" or bl == "no" then
-        if hasSFF and (attempt(setfflag, key, "False") or attempt(setfflag, name, "False")) then return true end
-    end
-    if hasSFF and (attempt(setfflag, key, vstr) or attempt(setfflag, name, vstr)) then return true end
-    if hasSFS and (attempt(setfstring, key, vstr) or attempt(setfstring, name, vstr)) then return true end
     return false
 end
 
@@ -413,50 +428,67 @@ local function doInject(txt)
         injectBtn.Text, injectBtn.Active = "INJECT", true
         return
     end
+    
     task.spawn(function()
         injState.running, injState.cancel, injState.paused = true, false, false
         local done, good, bad = 0, 0, 0
         pTxt.Text = "Inyectando " .. total .. " flags..."
-        for _, p in ipairs(flags) do
-            while injState.paused do pTxt.Text = "Pausado..." RunService.Heartbeat:Wait() end
-            if injState.cancel then pTxt.Text = "Cancelado " .. done .. "/" .. total break end
+        
+        for i, p in ipairs(flags) do
+            while injState.paused do 
+                pTxt.Text = "⏸ Pausado..."
+                task.wait(0.1)
+            end
+            if injState.cancel then 
+                pTxt.Text = "✕ Cancelado " .. done .. "/" .. total 
+                break 
+            end
+            
             local k, v = p.k, p.v
+            local success = false
+            
+            -- Proteccion total contra crashes
             local ok = pcall(function()
-                if trySet(k, v) then
-                    good = good + 1
-                    if getgenv().Neo and getgenv().Neo.InjectLog then
-                        getgenv().Neo.InjectLog.addSuccess(k, v)
-                    end
-                else
-                    bad = bad + 1
-                    if getgenv().Neo and getgenv().Neo.InjectLog then
-                        getgenv().Neo.InjectLog.addFailed(k, v, "err")
-                    end
-                end
+                success = trySet(k, v)
             end)
-            if not ok then
+            
+            if ok and success then
+                good = good + 1
+                if getgenv().Neo and getgenv().Neo.InjectLog then
+                    getgenv().Neo.InjectLog.addSuccess(k, v)
+                end
+            else
                 bad = bad + 1
                 if getgenv().Neo and getgenv().Neo.InjectLog then
-                    getgenv().Neo.InjectLog.addFailed(k, v, "pcall")
+                    getgenv().Neo.InjectLog.addFailed(k, v, ok and "rechazada" or "crash")
                 end
             end
+            
             done = done + 1
-            if done % 3 == 0 or done == total then
+            
+            -- Actualizar barra cada 5 flags o al final
+            if done % 5 == 0 or done == total then
                 local pc = done / total
-                TweenService:Create(pFill, TweenInfo.new(0.12), { Size = UDim2.new(pc, 0, 1, 0) }):Play()
+                TweenService:Create(pFill, TweenInfo.new(0.1), { Size = UDim2.new(pc, 0, 1, 0) }):Play()
                 pTxt.Text = string.format("%.0f%% | %d/%d | ✓ %d | ✕ %d", pc * 100, done, total, good, bad)
             end
-            RunService.Heartbeat:Wait()
+            
+            -- === CLAVE: task.wait en lugar de Heartbeat:Wait ===
+            -- Esto previene el crash por saturacion de red
             task.wait(INJECT_DELAY)
         end
+        
         pFill.Size = UDim2.new(1, 0, 1, 0)
         local msg = string.format("✓ %d  ✕ %d  Total %d", good, bad, total)
         pTxt.Text = msg
         notify(msg, true)
+        
+        -- Guardar reporte
         if getgenv().Neo and getgenv().Neo.InjectLog then
             local rep = getgenv().Neo.InjectLog.getReport()
             if writefile then writefile("KyroDev-InjectLog.txt", rep) end
         end
+        
         injState.running = false
         injectBtn.Text, injectBtn.Active = "INJECT", true
     end)
@@ -561,13 +593,12 @@ btnUpd.MouseButton1Click:Connect(updateLog)
 new("TextLabel", {
     Parent = pgI, Size = UDim2.new(1, -8, 0, 200), Position = UDim2.new(0, 4, 0, 4),
     BackgroundTransparency = 1, Text = [[⚡ KenyahSENCE
-FFlag Injector v4 Pastel
-
+FFlag Injector v4 
+- update : -
 [✓] Inyeccion lenta (anti-crash)
-[✓] Bypass limites delta
-[✓] Valores rotos/buffer0
+[✓] Bypass  delta
 [✓] Panel reducido
-[✓] Sistema [+]/[-]
+[✓] Sistema de logs [+]/[-]
 
 Owner: @0_kenyah]],
     Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = PASTEL.CREAM,
@@ -591,4 +622,4 @@ end)
 
 -- INICIAR
 startGlow()
-notify("⚡ KenyahSENCE - Iniciado", true)
+notify("⚡ KN4 - Iniciado", true)
