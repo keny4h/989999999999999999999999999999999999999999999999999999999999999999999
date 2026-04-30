@@ -321,7 +321,7 @@ local function fkind(k)
 end
 
 -- DELAY ANTI-CRASH (0.15s)
-local INJECT_DELAY = 0.15
+local INJECT_DELAY = 0.5
 
 local function trySet(key, val)
     local vstr, kind = tostring(val), fkind(key)
