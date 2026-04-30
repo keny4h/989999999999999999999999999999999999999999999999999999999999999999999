@@ -690,8 +690,8 @@ btnUpd.MouseButton1Click:Connect(updateLog)
 new("TextLabel", {
     Parent = pgI, Size = UDim2.new(1, -8, 0, 200), Position = UDim2.new(0, 4, 0, 4),
     BackgroundTransparency = 1, Text = [[⚡ KenyahSENCE
-FFlag Injector v4 
--     UPDATES :      -
+FFlag Injector v4 Pastel
+
 [✓] Inyeccion lenta (anti-crash)
 [✓] Bypass de limites delta
 [✓] Soporta valores rotos/buffer0
